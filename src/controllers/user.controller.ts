@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import jwt from "jsonwebtoken";
 import envConf from "../config/envConf";
+import { registerUser as registerUserService } from "../services/dbServices/userDB.services"; 
 
 // Controller for handling user login
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
@@ -23,19 +24,10 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate access token and refresh token using secrets from envConf
-    const accessToken = jwt.sign(
-      { id: user._id, email: user.email },
-      envConf.accessTokenSecret,
-      { expiresIn: envConf.accessTokenExpiry }
-    );
+    const accessToken = user.generateAccessToken(); // Use the method from the User model
+    const refreshToken = user.generateRefreshToken(); // Use the method from the User model
 
-    const refreshToken = jwt.sign(
-      { id: user._id, email: user.email },
-      envConf.refreshTokenSecret,
-      { expiresIn: envConf.refreshTokenExpiry }
-    );
-
-    // Optionally, save the refresh token to the user document in the database
+    // Save the refresh token to the user document in the database
     user.refreshToken = refreshToken;
     await user.save();
 
@@ -57,4 +49,31 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+// Controller for handling user registration
+export const registerUser = async (req: Request, res: Response): Promise<void> => {
+    const {  firstName, lastName,email,phoneNumber,  password } = req.body;
 
+    try {
+        // Call the service to register a new user
+        const newUser = await registerUserService({  firstName, lastName,email,phoneNumber,  password });
+        
+        // Return a success response
+        res.status(201).json({
+            message: "User registered successfully",
+            user: {
+                id: newUser._id,
+                email: newUser.email,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+            },
+        });
+    } catch (error: any) { // Specify any type for error to access error.message
+        console.error("Registration error:", error);
+        // Check for specific error messages
+        if (error.message.includes("User already exists")) {
+            res.status(409).json({ message: error.message }); // Conflict status
+        } else {
+            res.status(500).json({ message: "Server error" }); // General server error
+        }
+    }
+};
