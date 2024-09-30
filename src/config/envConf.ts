@@ -1,4 +1,9 @@
-// Define the type for the environment configuration
+import dotenv from 'dotenv';
+
+
+// Load environment variables from .env file
+dotenv.config();
+
 interface EnvConfig {
   mongoDbConnectionString: string;
   port: string;
@@ -7,23 +12,25 @@ interface EnvConfig {
   accessTokenExpiry: string;
   refreshTokenSecret: string;
   refreshTokenExpiry: string;
-  cloudinaryCloudName: string;
-  cloudinaryApiKey: string;
-  cloudinaryApiSecret: string;
 }
 
-// Safely handle undefined environment variables by providing fallback values
+const getEnvVar = (key: string, fallback?: string): string => {
+  const value = process.env[key];
+  if (!value && !fallback) {
+    console.error(`Error: Missing environment variable: ${key}`);
+    process.exit(1);
+  }
+  return value || fallback || '';
+};
+
 const envConf: EnvConfig = {
-  mongoDbConnectionString: process.env.MONGODB_CONNECTION_STRING || '',
-  port: process.env.PORT || '3000',
-  corsOrigin: process.env.CORS_ORIGIN || '*',
-  accessTokenSecret: process.env.ACCESS_TOKEN_SECRET || '',
-  accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY || '', 
-  refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET || '',
-  refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || '', 
-  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
-  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
-  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
-}
+  mongoDbConnectionString: getEnvVar('MONGODB_CONNECTION_STRING'),  // MongoDB URI from .env
+  port: getEnvVar('PORT', '3000'),
+  corsOrigin: getEnvVar('CORS_ORIGIN', '*'),
+  accessTokenSecret: getEnvVar('ACCESS_TOKEN_SECRET'),
+  accessTokenExpiry: getEnvVar('ACCESS_TOKEN_EXPIRY', '15m'),
+  refreshTokenSecret: getEnvVar('REFRESH_TOKEN_SECRET'),
+  refreshTokenExpiry: getEnvVar('REFRESH_TOKEN_EXPIRY', '7d')
+};
 
 export default envConf;
