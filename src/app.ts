@@ -6,8 +6,8 @@ import envConf from './config/envConf';
 import connectDB from './config/db'
 
 const app = express();
-const port = parseInt(envConf.port, 10) || 3000;
-
+const port = parseInt(envConf.port, 10) || 8000;
+app.use((express.json()))
 app.use('/api/users',Documentrouter);
 
 app.use('/api/users',userRouter);

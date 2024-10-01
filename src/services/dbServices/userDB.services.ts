@@ -13,10 +13,10 @@ export const registerUser = async (userData: any) => {
     }
 
     const newUser = new User({
-        phoneNumber,
-        email,
         firstName,
         lastName,
+        email,
+        phoneNumber,
         password,
     });
 
