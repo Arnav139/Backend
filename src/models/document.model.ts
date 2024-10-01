@@ -4,7 +4,7 @@ import mongoose, { Schema, Document as MongooseDocument } from "mongoose";
 interface Metadata {
     useCase: string;
     primaryKey: string;
-    researchLevel: number; // restricted between 0 and 100
+    researchLevel: number; 
     personality: string[];
     tone: string;
     language: string;
@@ -40,7 +40,7 @@ const DocumentSchema = new Schema(
         isDeleted: { type: Boolean, default: false },
         isFavorite: { type: Boolean, default: false },
     },
-    { timestamps: true } // Adds createdAt and updatedAt timestamps
+    { timestamps: true }
 );
 
 // Create the Document model using the interface and schema

@@ -5,6 +5,6 @@ const userRouter = Router();
 
 // Define routes for user-related endpoints
 userRouter.post("/login", loginUser);
-userRouter.post("/register", registerUser); // Added registration route
+userRouter.post("/register", registerUser); 
 userRouter.post("/logout",logoutUser)
 export default userRouter;

@@ -13,7 +13,7 @@ const Documentrouter = Router();
 Documentrouter.post("/create", verifyAccessToken, createDocumentController);
 
 // Route for fetching documents by user ID
-Documentrouter.get("/:userId", verifyAccessToken, getDocumentsByUserIdController);
+Documentrouter.get("/", verifyAccessToken, getDocumentsByUserIdController);
 
 //route to delete documents by user ID
 Documentrouter.delete("/:documentId",verifyAccessToken, deleteDocumentByUserId)

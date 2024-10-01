@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import envConf from './envConf'; // Assuming you have your configuration object
-
+import envConf from './envConf'; 
 const connectDB = async (): Promise<void> => {
   try {
     await mongoose.connect(envConf.mongoDbConnectionString);
