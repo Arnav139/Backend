@@ -16,8 +16,9 @@ interface AuthenticatedRequest extends Request {
 export const createDocumentController = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const userId = req.user;
-        const { content, metadata } = req.body;
+        const { metadata } = req.body;
 
+        const content = "Dummy Data";
         const newDocument = await createDocument(userId, content, metadata);
         res.status(201).json(newDocument);
     } catch (error) {
