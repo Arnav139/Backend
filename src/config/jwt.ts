@@ -27,7 +27,7 @@ const verifyAccessToken: RequestHandler = async (
         const decodedToken = jwt.verify(token, envConf.accessTokenSecret) as { _id: string };
 
         // Find user based on decoded token _id
-        const user = await User.findById(decodedToken._id).select("-password -refreshToken");
+        const user:any = await User.findById(decodedToken._id).select("-password -refreshToken");
 
         if (!user) {
             res.status(401).json({ message: "Unauthorized: User not found" });
@@ -35,7 +35,7 @@ const verifyAccessToken: RequestHandler = async (
         }
 
         // Attach user to the request object
-        req.user = user;
+        req.user = user
 
         // Proceed to the next middleware or route handler
         next();
