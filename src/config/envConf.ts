@@ -28,7 +28,7 @@ const envConf: EnvConfig = {
   port: getEnvVar('PORT', '3000'),
   corsOrigin: getEnvVar('CORS_ORIGIN', '*'),
   accessTokenSecret: getEnvVar('ACCESS_TOKEN_SECRET'),
-  accessTokenExpiry: getEnvVar('ACCESS_TOKEN_EXPIRY', '15m'),
+  accessTokenExpiry: getEnvVar('ACCESS_TOKEN_EXPIRY', '60m'),
   refreshTokenSecret: getEnvVar('REFRESH_TOKEN_SECRET'),
   refreshTokenExpiry: getEnvVar('REFRESH_TOKEN_EXPIRY', '7d')
 };
