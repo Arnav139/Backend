@@ -5,12 +5,13 @@ import { createDocument, getDocumentsByUserId } from "../services/dbServices/doc
 // Create a new document
 export const createDocumentController = async (req: Request, res: Response) => {
   try {
-    const userId = new mongoose.Types.ObjectId(req.body.userId);
+    const userId = req.body.user;
     const { content, metadata } = req.body;
 
     const newDocument = await createDocument(userId, content, metadata);
     res.status(201).json(newDocument);
   } catch (error) {
+    console.log("aye gye error",error)
     res.status(500).json({  error });
   }
 };
@@ -19,7 +20,6 @@ export const createDocumentController = async (req: Request, res: Response) => {
 export const getDocumentsByUserIdController = async (req: Request, res: Response) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.params.userId);
-
     const documents = await getDocumentsByUserId(userId);
     res.status(200).json(documents);
   } catch (error) {
