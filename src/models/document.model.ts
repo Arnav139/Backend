@@ -4,9 +4,9 @@ import mongoose, { Schema, Document as MongooseDocument } from "mongoose";
 interface Metadata {
     useCase: string;
     primaryKey: string;
-    researchLevel: number; 
+    researchLevel: number;
     personality: string[];
-    tone: string;
+    tone: string[];
     language: string;
 }
 
@@ -27,7 +27,7 @@ const MetadataSchema = new Schema({
     primaryKey: { type: String },
     researchLevel: { type: Number, min: 0, max: 100 },
     personality: [{ type: String }],
-    tone: { type: String },
+    tone: [{ type: String }],
     language: { type: String },
 });
 

@@ -1,4 +1,3 @@
-// user route
 import express from "express";
 import Documentrouter from "./routes/document.router";
 import userRouter from "./routes/user.router";

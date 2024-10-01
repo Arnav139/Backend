@@ -2,10 +2,10 @@ import { Router } from "express";
 import {
     createDocumentController,
     getDocumentsByUserIdController,
-    deleteDocumentByUserId
+    deleteDocumentByUserId,
+    toggleIsFavoriteByDocumentId,
 } from "../controllers/document.controller";
 import { verifyAccessToken } from "../config/jwt";
-import { verify } from "crypto";
 
 const Documentrouter = Router();
 
@@ -16,6 +16,9 @@ Documentrouter.post("/create", verifyAccessToken, createDocumentController);
 Documentrouter.get("/", verifyAccessToken, getDocumentsByUserIdController);
 
 //route to delete documents by user ID
-Documentrouter.delete("/:documentId",verifyAccessToken, deleteDocumentByUserId)
+Documentrouter.delete("/:documentId", verifyAccessToken, deleteDocumentByUserId);
+
+//route to toggle isFavorite
+Documentrouter.put("/:documentId", verifyAccessToken, toggleIsFavoriteByDocumentId);
 
 export default Documentrouter;
