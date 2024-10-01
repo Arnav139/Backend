@@ -100,7 +100,7 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
 
     if (!refreshToken) {
         res.status(400).json({ message: "Refresh token is required" });
-        return; // Stop execution if no refresh token is provided
+        return;
     }
 
     try {
@@ -109,11 +109,14 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
 
         if (!user) {
             res.status(404).json({ message: "User not found or already logged out" });
-            return; // Stop execution if the user is not found
+            return;
         }
 
-        // Clear the refresh token in the user record (log the user out)
+        console.log("user before logout", user);
+
         user.refreshToken = "";
+
+        console.log("user after logout", user);
         await user.save();
 
         res.status(200).json({ message: "Logout successful" });

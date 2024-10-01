@@ -22,8 +22,14 @@ export const getDocumentsByUserId = async (userId: mongoose.Types.ObjectId) => {
 
 // Service to delete a document by document ID and user ID
 export const deleteDocumentById = async (userId: mongoose.Types.ObjectId, documentId: string) => {
-    const result = await DocumentModel.findOneAndDelete({ _id: documentId, user: userId });
-    return result !== null;
+    // Find the document and update its isDeleted field to true
+    const result = await DocumentModel.findOneAndUpdate(
+        { _id: documentId, user: userId }, 
+        { isDeleted: true }, 
+        { new: true } 
+    );
+
+    return result !== null; // Return true if the document was found and updated
 };
 
 // Service to update isFavorite of document by document ID and user ID
