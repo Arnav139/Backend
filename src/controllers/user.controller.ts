@@ -76,3 +76,33 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
         }
     }
 };
+
+
+// Controller for handling user logout
+export const logoutUser = async (req: Request, res: Response): Promise<void> => {
+  const { refreshToken } = req.body; 
+
+  if (!refreshToken) {
+    res.status(400).json({ message: "Refresh token is required" });
+    return; // Stop execution if no refresh token is provided
+  }
+
+  try {
+    // Find the user associated with the given refresh token
+    const user = await User.findOne({ refreshToken });
+    
+    if (!user) {
+      res.status(404).json({ message: "User not found or already logged out" });
+      return; // Stop execution if the user is not found
+    }
+
+    // Clear the refresh token in the user record (log the user out)
+    user.refreshToken = '';
+    await user.save();
+
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ message: "Server error during logout" });
+  }
+};
