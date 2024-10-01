@@ -19,8 +19,13 @@ interface IUser extends Document {
 // Define the schema
 const userSchema = new Schema<IUser>(
     {
-        phoneNumber: {
-            type: Number,
+        firstName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        lastName: {
+            type: String,
             required: true,
             trim: true,
         },
@@ -32,13 +37,8 @@ const userSchema = new Schema<IUser>(
             trim: true,
             index: true,
         },
-        firstName: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        lastName: {
-            type: String,
+        phoneNumber: {
+            type: Number,
             required: true,
             trim: true,
         },
