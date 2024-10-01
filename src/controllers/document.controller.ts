@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { createDocument, getDocumentsByUserId, deleteDocumentById } from "../services/dbServices/docs.services"; // Adjust the path as needed
+import {
+    createDocument,
+    getDocumentsByUserId,
+    deleteDocumentById,
+    updateIsFavoriteByDocumentId,
+} from "../services/dbServices/docs.services"; // Adjust the path as needed
 import { User } from "../models/user.model";
 
 interface AuthenticatedRequest extends Request {
@@ -11,8 +16,9 @@ interface AuthenticatedRequest extends Request {
 export const createDocumentController = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const userId = req.user;
-        const { content, metadata } = req.body;
+        const { metadata } = req.body;
 
+        const content = "Dummy Data";
         const newDocument = await createDocument(userId, content, metadata);
         res.status(201).json(newDocument);
     } catch (error) {
@@ -36,11 +42,11 @@ export const getDocumentsByUserIdController = async (req: AuthenticatedRequest, 
 // Delete a document by user ID
 export const deleteDocumentByUserId = async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const userId = req.user;         
-        const documentId = req.params.documentId; 
+        const userId = req.user;
+        const documentId = req.params.documentId;
 
         // Call the service to delete the document
-        const result = await deleteDocumentById(userId, documentId); 
+        const result = await deleteDocumentById(userId, documentId);
 
         if (result) {
             res.status(200).json({ message: "Document deleted successfully" });
@@ -53,3 +59,24 @@ export const deleteDocumentByUserId = async (req: AuthenticatedRequest, res: Res
     }
 };
 
+// toggle  isFavorite of document by document ID
+export const toggleIsFavoriteByDocumentId = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = req.user;
+        const documentId = req.params.documentId;
+
+        // Call the service to update IsFavorite field of Document
+        const result = await updateIsFavoriteByDocumentId(userId, documentId);
+
+        if (result) {
+            res.status(200).json({ message: "Document isFavorite updated successfully" });
+        } else {
+            res.status(404).json({
+                message: "Document not found or not authorized to update isFavorite",
+            });
+        }
+    } catch (error) {
+        console.error("Error deleting document:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};

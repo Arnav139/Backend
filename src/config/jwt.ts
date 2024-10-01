@@ -5,7 +5,7 @@ import envConf from "../config/envConf";
 
 // Define an interface to extend Express's Request object to include 'user'
 interface AuthenticatedRequest extends Request {
-    user?: any; 
+    user?: any;
 }
 
 const verifyAccessToken: RequestHandler = async (
@@ -27,15 +27,19 @@ const verifyAccessToken: RequestHandler = async (
         const decodedToken = jwt.verify(token, envConf.accessTokenSecret) as { _id: string };
 
         // Find user based on decoded token _id
-        const user:any = await User.findById(decodedToken._id).select("-password -refreshToken");
-
+        const user: any = await User.findById(decodedToken._id).select("-password");
         if (!user) {
             res.status(401).json({ message: "Unauthorized: User not found" });
             return;
         }
+        if (user.refreshToken === "") {
+            res.status(401).json({ message: "Unauthorized: Token Expired" });
+            return;
+        }
 
+        user.refreshToken = "hidden";
         // Attach user to the request object
-        req.user = user
+        req.user = user;
 
         // Proceed to the next middleware or route handler
         next();
