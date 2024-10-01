@@ -11,6 +11,6 @@ const Documentrouter = Router();
 Documentrouter.post("/create", verifyAccessToken, createDocumentController);
 
 // Route for fetching documents by user ID
-Documentrouter.get("/:userId", verifyAccessToken, getDocumentsByUserIdController);
+Documentrouter.get("/", verifyAccessToken, getDocumentsByUserIdController);
 
 export default Documentrouter;
