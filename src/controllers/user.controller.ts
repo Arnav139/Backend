@@ -12,14 +12,14 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         const user = await User.findOne({ email });
         if (!user) {
             res.status(404).json({ message: "User not found" });
-            return; // Explicitly return to stop execution
+            return; 
         }
 
         // Check if the entered password is correct
         const isPasswordCorrect = await user.isPasswordCorrect(password);
         if (!isPasswordCorrect) {
             res.status(400).json({ message: "Invalid credentials" });
-            return; // Explicitly return to stop execution
+            return; 
         }
 
         // Generate access token and refresh token using secrets from envConf

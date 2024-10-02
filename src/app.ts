@@ -6,12 +6,23 @@ import envConf from "./config/envConf";
 import connectDB from "./config/db";
 
 const app = express();
-const port = parseInt(envConf.port, 10) || 8000;
+const port = 8000;
 
-// Enable CORS for all routes
-app.use(cors());
+app.use(
+    cors({
+        origin: "*",
+        methods: ["GET", "POST", "PUT", "DELETE"],
+    })
+);
 
 app.use(express.json());
+
+app.get("/", (req, res) => {
+    res.send(`
+    <h1>Welcome to the Home Page</h1>
+    <p>This is Home API of Backend Task.</p>
+  `);
+});
 app.use("/api/documents", Documentrouter);
 app.use("/api/users", userRouter);
 
