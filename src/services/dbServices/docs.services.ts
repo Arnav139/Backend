@@ -1,4 +1,4 @@
-import DocumentModel from "../../models/document.model"; 
+import DocumentModel from "../../models/document.model";
 import mongoose from "mongoose";
 
 // Create a new document
@@ -12,7 +12,13 @@ export const createDocument = async (
         content,
         metadata,
     });
-    return await newDocument.save();
+
+    // Save the document and exclude the user field in the returned document
+    const savedDocument = await newDocument.save();
+
+    // Return the saved document without the user field
+    const { user, ...documentWithoutUser } = savedDocument.toObject();
+    return documentWithoutUser;
 };
 
 // Fetch documents by user ID
@@ -24,9 +30,9 @@ export const getDocumentsByUserId = async (userId: mongoose.Types.ObjectId) => {
 export const deleteDocumentById = async (userId: mongoose.Types.ObjectId, documentId: string) => {
     // Find the document and update its isDeleted field to true
     const result = await DocumentModel.findOneAndUpdate(
-        { _id: documentId, user: userId }, 
-        { isDeleted: true }, 
-        { new: true } 
+        { _id: documentId, user: userId },
+        { isDeleted: true },
+        { new: true }
     );
 
     return result !== null; // Return true if the document was found and updated
