@@ -15,10 +15,10 @@ Documentrouter.post("/create", verifyAccessToken, createDocumentController);
 // Route for fetching documents by user ID
 Documentrouter.get("/", verifyAccessToken, getDocumentsByUserIdController);
 
-//route to delete documents by user ID
+// Route to delete documents by user ID
 Documentrouter.delete("/:documentId", verifyAccessToken, deleteDocumentByUserId);
 
-//route to toggle isFavorite
+// Route to toggle isFavorite
 Documentrouter.put("/:documentId", verifyAccessToken, toggleIsFavoriteByDocumentId);
 
 export default Documentrouter;

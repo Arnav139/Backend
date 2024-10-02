@@ -7,16 +7,34 @@ import {
     updateIsFavoriteByDocumentId,
 } from "../services/dbServices/docs.services"; // Adjust the path as needed
 import { User } from "../models/user.model";
+import { validateMetadata } from "../validation/documentValidation";
 
 interface AuthenticatedRequest extends Request {
     user?: any;
 }
 
 // Create a new document
-export const createDocumentController = async (req: AuthenticatedRequest, res: Response) => {
+export const createDocumentController = async (
+    req: AuthenticatedRequest,
+    res: Response
+): Promise<void> => {
     try {
         const userId = req.user;
         const { metadata } = req.body;
+
+        // If metadata is missing, return early after sending the response
+        if (!metadata) {
+            res.status(400).json({ message: "Invalid request!, metaData missing" });
+            return;
+        }
+
+        const validationResult = validateMetadata(metadata);
+
+        // If metadata validation fails, return early after sending the response
+        if (!validationResult.success) {
+            res.status(400).json({ message: validationResult.error.errors });
+            return;
+        }
 
         const content = "Dummy Data";
         const newDocument = await createDocument(userId, content, metadata);
