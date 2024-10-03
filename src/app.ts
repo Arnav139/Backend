@@ -4,6 +4,7 @@ import Documentrouter from "./routes/document.router";
 import userRouter from "./routes/user.router";
 import envConf from "./config/envConf";
 import connectDB from "./config/db";
+import "./workers/queueWorker";
 
 const app = express();
 const port = 8000;
