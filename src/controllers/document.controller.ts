@@ -6,7 +6,7 @@ import {
     deleteDocumentById,
     updateIsFavoriteByDocumentId,
     updateContentByDocumentId,
-} from "../services/dbServices/docs.services"; 
+} from "../services/dbServices/docs.services";
 
 interface AuthenticatedRequest extends Request {
     user?: any;
@@ -23,10 +23,15 @@ export const createDocumentController = async (
 
         const content = "Dummy Data";
         const newDocument = await createDocument(userId, content, metadata);
-        res.status(201).json(newDocument);
+        res.status(201).json({
+            status: true,
+            message: "Document added successfully",
+            document: newDocument,
+        });
     } catch (error) {
         console.error("Error creating document:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        const message = error instanceof Error ? error.message : "Internal Server Error";
+        res.status(500).json({ status: false, message });
     }
 };
 
@@ -35,10 +40,15 @@ export const getDocumentsByUserIdController = async (req: AuthenticatedRequest, 
     try {
         const userId = req.user;
         const documents = await getDocumentsByUserId(userId);
-        res.status(200).json(documents);
+        res.status(200).json({
+            status: true,
+            message: "Documents fetched successfully",
+            documents: documents,
+        });
     } catch (error) {
         console.error("Error fetching documents:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        const message = error instanceof Error ? error.message : "Internal Server Error";
+        res.status(500).json({ status: false, message });
     }
 };
 
@@ -52,13 +62,20 @@ export const deleteDocumentByUserId = async (req: AuthenticatedRequest, res: Res
         const result = await deleteDocumentById(userId, documentId);
 
         if (result) {
-            res.status(200).json({ message: "Document deleted successfully" });
+            res.status(200).json({
+                status: true,
+                message: "Document deleted successfully",
+            });
         } else {
-            res.status(404).json({ message: "Document not found or not authorized to delete" });
+            res.status(404).json({
+                status: false,
+                message: "Document not found or not authorized to delete",
+            });
         }
     } catch (error) {
         console.error("Error deleting document:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        const message = error instanceof Error ? error.message : "Internal Server Error";
+        res.status(500).json({ status: false, message });
     }
 };
 
@@ -72,15 +89,20 @@ export const toggleIsFavoriteByDocumentId = async (req: AuthenticatedRequest, re
         const result = await updateIsFavoriteByDocumentId(userId, documentId);
 
         if (result) {
-            res.status(200).json({ message: "Document isFavorite updated successfully" });
+            res.status(200).json({
+                status: true,
+                message: "Document isFavorite updated successfully",
+            });
         } else {
             res.status(404).json({
+                status: false,
                 message: "Document not found or not authorized to update isFavorite",
             });
         }
     } catch (error) {
         console.error("Error deleting document:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        const message = error instanceof Error ? error.message : "Internal Server Error";
+        res.status(500).json({ status: false, message });
     }
 };
 
@@ -95,14 +117,19 @@ export const updateDocumentByDocumentId = async (req: AuthenticatedRequest, res:
         const result = await updateContentByDocumentId(userId, documentId, content);
 
         if (result) {
-            res.status(200).json({ message: "Document content updated successfully" });
+            res.status(200).json({
+                status: true,
+                message: "Document content updated successfully",
+            });
         } else {
             res.status(404).json({
+                status: false,
                 message: "Document not found or not authorized to update content",
             });
         }
     } catch (error) {
         console.error("Error updating document:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        const message = error instanceof Error ? error.message : "Internal Server Error";
+        res.status(500).json({ status: false, message });
     }
 };

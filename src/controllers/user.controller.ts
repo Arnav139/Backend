@@ -10,14 +10,14 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         // Check if the user exists
         const user = await User.findOne({ email });
         if (!user) {
-            res.status(404).json({ message: "User not found" });
+            res.status(404).json({ status: false, message: "User not found" });
             return;
         }
 
         // Check if the entered password is correct
         const isPasswordCorrect = await user.isPasswordCorrect(password);
         if (!isPasswordCorrect) {
-            res.status(400).json({ message: "Invalid credentials" });
+            res.status(400).json({ status: false, message: "Invalid credentials" });
             return;
         }
 
@@ -31,6 +31,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 
         // Return the tokens and user details in the response
         res.status(200).json({
+            status: true,
             message: "Login successful",
             accessToken,
             refreshToken,
@@ -43,7 +44,8 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         });
     } catch (error) {
         console.error("Login error:", error);
-        res.status(500).json({ message: "Server error" });
+        const message = error instanceof Error ? error.message : "Internal Server Error";
+        res.status(500).json({ status: false, message });
     }
 };
 
@@ -71,6 +73,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
         // Return a success response
         res.status(201).json({
+            status: true,
             message: "User registered successfully",
             accessToken,
             refreshToken,
@@ -82,13 +85,13 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
             },
         });
     } catch (error: any) {
-        // Specify any type for error to access error.message
         console.error("Registration error:", error);
-        // Check for specific error messages
+
         if (error.message.includes("User already exists")) {
-            res.status(409).json({ message: error.message }); // Conflict status
+            res.status(409).json({ status: false, message: error.message });
         } else {
-            res.status(500).json({ message: "Server error" }); // General server error
+            const message = error instanceof Error ? error.message : "Internal Server Error";
+            res.status(500).json({ status: false, message });
         }
     }
 };
@@ -98,7 +101,7 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-        res.status(400).json({ message: "Refresh token is required" });
+        res.status(400).json({ status: false, message: "Refresh token is required" });
         return;
     }
 
@@ -107,7 +110,10 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
         const user = await User.findOne({ refreshToken });
 
         if (!user) {
-            res.status(404).json({ message: "User not found or already logged out" });
+            res.status(404).json({
+                status: false,
+                message: "User not found or already logged out",
+            });
             return;
         }
 
@@ -118,9 +124,13 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
         console.log("user after logout", user);
         await user.save();
 
-        res.status(200).json({ message: "Logout successful" });
+        res.status(200).json({
+            status: true,
+            message: "Logout successful",
+        });
     } catch (error) {
         console.error("Logout error:", error);
-        res.status(500).json({ message: "Server error during logout" });
+        const message = error instanceof Error ? error.message : "Internal Server Error";
+        res.status(500).json({ status: false, message });
     }
 };
