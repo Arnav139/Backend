@@ -18,3 +18,13 @@ export const metadataSchema = z.object({
 export const validateMetadata = (metadata: unknown) => {
     return metadataSchema.safeParse(metadata);
 };
+
+// Validation schema for the content field
+const contentSchema = z.object({
+    content: z.string().nonempty({ message: "Content is required" }),
+});
+
+// Create a function to validate content
+export const validateContent = (content: unknown) => {
+    return contentSchema.safeParse(content);
+};

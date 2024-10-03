@@ -4,6 +4,7 @@ import {
     getDocumentsByUserIdController,
     deleteDocumentByUserId,
     toggleIsFavoriteByDocumentId,
+    updateDocumentByDocumentId,
 } from "../controllers/document.controller";
 import { verifyAccessToken } from "../config/jwt";
 
@@ -20,5 +21,8 @@ Documentrouter.delete("/:documentId", verifyAccessToken, deleteDocumentByUserId)
 
 // Route to toggle isFavorite
 Documentrouter.put("/:documentId", verifyAccessToken, toggleIsFavoriteByDocumentId);
+
+// Route to update content
+Documentrouter.put("/updateContent/:documentId", verifyAccessToken, updateDocumentByDocumentId);
 
 export default Documentrouter;

@@ -53,3 +53,19 @@ export const updateIsFavoriteByDocumentId = async (
 
     return result !== null;
 };
+
+// Service to update a document's content by document ID and user ID
+export const updateContentByDocumentId = async (
+    userId: mongoose.Types.ObjectId,
+    documentId: string,
+    content: string
+) => {
+    // Find the document and update its content field
+    const result = await DocumentModel.findOneAndUpdate(
+        { _id: documentId, user: userId },
+        { content },
+        { new: true }
+    );
+
+    return result !== null;
+};

@@ -5,9 +5,10 @@ import {
     getDocumentsByUserId,
     deleteDocumentById,
     updateIsFavoriteByDocumentId,
+    updateContentByDocumentId,
 } from "../services/dbServices/docs.services"; // Adjust the path as needed
 import { User } from "../models/user.model";
-import { validateMetadata } from "../validation/documentValidation";
+import { validateContent, validateMetadata } from "../validation/documentValidation";
 
 interface AuthenticatedRequest extends Request {
     user?: any;
@@ -95,6 +96,36 @@ export const toggleIsFavoriteByDocumentId = async (req: AuthenticatedRequest, re
         }
     } catch (error) {
         console.error("Error deleting document:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+// Update document content by documentId
+export const updateDocumentByDocumentId = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = req.user;
+        const documentId = req.params.documentId;
+        const { content } = req.body;
+        const validationResult = validateContent({ content });
+
+        // If content validation fails, return early after sending the response
+        if (!validationResult.success) {
+            res.status(400).json({ message: validationResult.error.errors });
+            return;
+        }
+
+        // Call the service to update the content field of the Document
+        const result = await updateContentByDocumentId(userId, documentId, content);
+
+        if (result) {
+            res.status(200).json({ message: "Document content updated successfully" });
+        } else {
+            res.status(404).json({
+                message: "Document not found or not authorized to update content",
+            });
+        }
+    } catch (error) {
+        console.error("Error updating document:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
