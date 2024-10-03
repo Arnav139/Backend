@@ -1,6 +1,6 @@
 import { Job } from "bull";
 import apiQueue from "../queues/apiQueue";
-import { Request, Response } from "express"; 
+import { Request, Response } from "express";
 
 // Define the shape of the job data
 interface JobData {
@@ -11,7 +11,7 @@ interface JobData {
 
 // Worker to process jobs from the queue
 apiQueue.process(async (job: Job<JobData>) => {
-    const { req, res, handler } = job.data; 
+    const { req, res, handler } = job.data;
 
     try {
         // Process the request with the handler
@@ -20,3 +20,5 @@ apiQueue.process(async (job: Job<JobData>) => {
         console.error("Error processing job: ", error);
     }
 });
+
+export default apiQueue;

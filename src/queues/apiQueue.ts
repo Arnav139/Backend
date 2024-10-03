@@ -16,15 +16,5 @@ const apiQueue = new Bull<JobData>("api-requests", {
     },
 });
 
-// Process 10 jobs at a time
-apiQueue.process(10, async (job: Job<JobData>) => {
-    const { req, res, handler } = job.data;
-
-    try {
-        await handler(req, res); // Call the actual API handler
-    } catch (error) {
-        console.error("Error processing job: ", error);
-    }
-});
-
+// Export the queue
 export default apiQueue;

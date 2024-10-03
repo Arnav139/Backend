@@ -34,9 +34,9 @@ Documentrouter.put("/:documentId", verifyAccessToken, toggleIsFavoriteByDocument
 // Route to update content
 Documentrouter.put(
     "/updateContent/:documentId",
-    validateContentMiddleware, // Apply content validation middleware
-    verifyAccessToken, // Apply token verification middleware
-    updateDocumentByDocumentId // Controller to update the document
+    validateContentMiddleware, 
+    verifyAccessToken, 
+    updateDocumentByDocumentId
 );
 
 export default Documentrouter;
