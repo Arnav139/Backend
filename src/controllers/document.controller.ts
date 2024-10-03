@@ -6,9 +6,7 @@ import {
     deleteDocumentById,
     updateIsFavoriteByDocumentId,
     updateContentByDocumentId,
-} from "../services/dbServices/docs.services"; // Adjust the path as needed
-import { User } from "../models/user.model";
-import { validateContent, validateMetadata } from "../validation/documentValidation";
+} from "../services/dbServices/docs.services"; 
 
 interface AuthenticatedRequest extends Request {
     user?: any;
@@ -22,20 +20,6 @@ export const createDocumentController = async (
     try {
         const userId = req.user;
         const { metadata } = req.body;
-
-        // If metadata is missing, return early after sending the response
-        if (!metadata) {
-            res.status(400).json({ message: "Invalid request!, metaData missing" });
-            return;
-        }
-
-        const validationResult = validateMetadata(metadata);
-
-        // If metadata validation fails, return early after sending the response
-        if (!validationResult.success) {
-            res.status(400).json({ message: validationResult.error.errors });
-            return;
-        }
 
         const content = "Dummy Data";
         const newDocument = await createDocument(userId, content, metadata);
@@ -106,13 +90,6 @@ export const updateDocumentByDocumentId = async (req: AuthenticatedRequest, res:
         const userId = req.user;
         const documentId = req.params.documentId;
         const { content } = req.body;
-        const validationResult = validateContent({ content });
-
-        // If content validation fails, return early after sending the response
-        if (!validationResult.success) {
-            res.status(400).json({ message: validationResult.error.errors });
-            return;
-        }
 
         // Call the service to update the content field of the Document
         const result = await updateContentByDocumentId(userId, documentId, content);

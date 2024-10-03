@@ -1,22 +1,12 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
-
 import { registerUser as registerUserService } from "../services/dbServices/userDB.services";
-import { validateLoginData, validateRegistrationData } from "../validation/userValidation";
 
 // Controller for handling user login
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     try {
-        const validationResult = validateLoginData({ email, password });
-
-        // If metadata validation fails, return early after sending the response
-        if (!validationResult.success) {
-            res.status(400).json({ message: validationResult.error.errors });
-            return;
-        }
-
         // Check if the user exists
         const user = await User.findOne({ email });
         if (!user) {
@@ -62,20 +52,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     const { firstName, lastName, email, phoneNumber, password } = req.body;
 
     try {
-        const validationResult = validateRegistrationData({
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            password,
-        });
-
-        // If registration validation fails, return early after sending the response
-        if (!validationResult.success) {
-            res.status(400).json({ message: validationResult.error.errors });
-            return;
-        }
-
         // Call the service to register a new user
         const newUser = await registerUserService({
             firstName,

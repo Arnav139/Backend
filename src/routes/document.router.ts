@@ -7,11 +7,20 @@ import {
     updateDocumentByDocumentId,
 } from "../controllers/document.controller";
 import { verifyAccessToken } from "../config/jwt";
+import {
+    validateContentMiddleware,
+    validateMetadataMiddleware,
+} from "../validation/documentValidation";
 
 const Documentrouter = Router();
 
 // Route for creating a new document
-Documentrouter.post("/create", verifyAccessToken, createDocumentController);
+Documentrouter.post(
+    "/create",
+    validateMetadataMiddleware,
+    verifyAccessToken,
+    createDocumentController
+);
 
 // Route for fetching documents by user ID
 Documentrouter.get("/", verifyAccessToken, getDocumentsByUserIdController);
@@ -23,6 +32,11 @@ Documentrouter.delete("/:documentId", verifyAccessToken, deleteDocumentByUserId)
 Documentrouter.put("/:documentId", verifyAccessToken, toggleIsFavoriteByDocumentId);
 
 // Route to update content
-Documentrouter.put("/updateContent/:documentId", verifyAccessToken, updateDocumentByDocumentId);
+Documentrouter.put(
+    "/updateContent/:documentId",
+    validateContentMiddleware, // Apply content validation middleware
+    verifyAccessToken, // Apply token verification middleware
+    updateDocumentByDocumentId // Controller to update the document
+);
 
 export default Documentrouter;
