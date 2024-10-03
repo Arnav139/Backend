@@ -23,7 +23,9 @@ export const createDocument = async (
 
 // Fetch documents by user ID
 export const getDocumentsByUserId = async (userId: mongoose.Types.ObjectId) => {
-    return await DocumentModel.find({ user: userId, isDeleted: false }).select("-user");
+    return await DocumentModel.find({ user: userId, isDeleted: false })
+        .select("-user")
+        .sort("-updatedAt");
 };
 
 // Service to delete a document by document ID and user ID
