@@ -1,12 +1,16 @@
 import { Router } from "express";
 import { loginUser, registerUser, logoutUser } from "../controllers/user.controller";
-import { validateLogin, validateLogout, validateRegister } from "../validation";
+import validator from "../validation";
+import { validateRequest } from "../middlewares/validateRequest";
 
 const userRouter = Router();
 
-// Define routes for user-related endpoints using the new validation schema structure
-userRouter.post("/login", validateLogin, loginUser);
-userRouter.post("/register", validateRegister, registerUser);
-userRouter.post("/logout", validateLogout, logoutUser);
+userRouter.post("/login", validateRequest(validator.userValidators.loginUserSchema), loginUser);
+userRouter.post(
+    "/register",
+    validateRequest(validator.userValidators.registerUserSchema),
+    registerUser
+);
+userRouter.post("/logout", validateRequest(validator.userValidators.logoutUserSchema), logoutUser);
 
 export default userRouter;

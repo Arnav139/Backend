@@ -1,5 +1,3 @@
-// src/routes/document.routes.ts
-
 import { Router } from "express";
 import {
     createDocumentController,
@@ -9,26 +7,31 @@ import {
     updateDocumentByDocumentId,
 } from "../controllers/document.controller";
 import { verifyAccessToken } from "../config/jwt";
-import {
-    validateCreateDocument,
-    validateUpdateContent,
-    validateGetDocuments,
-    validateDeleteDocument,
-    validateToggleIsFavorite,
-} from "../validation"; // Updated imports
+import validator from "../validation";
+import { validateRequest } from "../middlewares/validateRequest";
 
 const DocumentRouter = Router();
 
-// Route for creating a new document (with metadata in the body)
-DocumentRouter.post("/create", validateCreateDocument, verifyAccessToken, createDocumentController);
+DocumentRouter.post(
+    "/create",
+    validateRequest(validator.DocumentValidators.createDocumentSchema),
+    verifyAccessToken,
+    createDocumentController
+);
 
 // Route for fetching documents by user ID
-DocumentRouter.get("/", verifyAccessToken, validateGetDocuments, getDocumentsByUserIdController);
+DocumentRouter.get(
+    "/",
+    verifyAccessToken,
+    validateRequest(validator.DocumentValidators.getDocumentsSchema),
+    getDocumentsByUserIdController
+);
 
 // Route to delete a document by documentId
 DocumentRouter.delete(
     "/:documentId",
-    validateDeleteDocument,
+
+    validateRequest(validator.DocumentValidators.deleteDocumentSchema),
     verifyAccessToken,
     deleteDocumentByUserId
 );
@@ -36,7 +39,8 @@ DocumentRouter.delete(
 // Route to toggle isFavorite
 DocumentRouter.put(
     "/:documentId",
-    validateToggleIsFavorite,
+
+    validateRequest(validator.DocumentValidators.toggleIsFavoriteSchema),
     verifyAccessToken,
     toggleIsFavoriteByDocumentId
 );
@@ -44,7 +48,8 @@ DocumentRouter.put(
 // Route to update content by documentId
 DocumentRouter.put(
     "/updateContent/:documentId",
-    validateUpdateContent,
+
+    validateRequest(validator.DocumentValidators.updateContentSchema),
     verifyAccessToken,
     updateDocumentByDocumentId
 );
