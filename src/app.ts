@@ -1,9 +1,7 @@
 import express from "express";
 import cors from "cors";
-import Documentrouter from "./routes/document.router";
-import userRouter from "./routes/user.router";
-import envConf from "./config/envConf";
 import connectDB from "./config/db";
+import routes from "./routes";
 
 const app = express();
 const port = 8000;
@@ -16,15 +14,7 @@ app.use(
 );
 
 app.use(express.json());
-
-app.get("/", (req, res) => {
-    res.send(`
-    <h1>Welcome to the Home Page</h1>
-    <p>This is Home API of Backend Task.</p>
-  `);
-});
-app.use("/api/documents", Documentrouter);
-app.use("/api/users", userRouter);
+app.use("/", routes);
 
 app.listen(port, async () => {
     await connectDB();

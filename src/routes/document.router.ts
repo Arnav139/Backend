@@ -1,3 +1,5 @@
+// src/routes/document.routes.ts
+
 import { Router } from "express";
 import {
     createDocumentController,
@@ -8,35 +10,43 @@ import {
 } from "../controllers/document.controller";
 import { verifyAccessToken } from "../config/jwt";
 import {
-    validateContentMiddleware,
-    validateMetadataMiddleware,
-} from "../validation/documentValidation";
+    validateCreateDocument,
+    validateUpdateContent,
+    validateGetDocuments,
+    validateDeleteDocument,
+    validateToggleIsFavorite,
+} from "../validation"; // Updated imports
 
-const Documentrouter = Router();
+const DocumentRouter = Router();
 
-// Route for creating a new document
-Documentrouter.post(
-    "/create",
-    validateMetadataMiddleware,
-    verifyAccessToken,
-    createDocumentController
-);
+// Route for creating a new document (with metadata in the body)
+DocumentRouter.post("/create", validateCreateDocument, verifyAccessToken, createDocumentController);
 
 // Route for fetching documents by user ID
-Documentrouter.get("/", verifyAccessToken, getDocumentsByUserIdController);
+DocumentRouter.get("/", verifyAccessToken, validateGetDocuments, getDocumentsByUserIdController);
 
-// Route to delete documents by user ID
-Documentrouter.delete("/:documentId", verifyAccessToken, deleteDocumentByUserId);
-
-// Route to toggle isFavorite
-Documentrouter.put("/:documentId", verifyAccessToken, toggleIsFavoriteByDocumentId);
-
-// Route to update content
-Documentrouter.put(
-    "/updateContent/:documentId",
-    validateContentMiddleware, // Apply content validation middleware
-    verifyAccessToken, // Apply token verification middleware
-    updateDocumentByDocumentId // Controller to update the document
+// Route to delete a document by documentId
+DocumentRouter.delete(
+    "/:documentId",
+    validateDeleteDocument,
+    verifyAccessToken,
+    deleteDocumentByUserId
 );
 
-export default Documentrouter;
+// Route to toggle isFavorite
+DocumentRouter.put(
+    "/:documentId",
+    validateToggleIsFavorite,
+    verifyAccessToken,
+    toggleIsFavoriteByDocumentId
+);
+
+// Route to update content by documentId
+DocumentRouter.put(
+    "/updateContent/:documentId",
+    validateUpdateContent,
+    verifyAccessToken,
+    updateDocumentByDocumentId
+);
+
+export default DocumentRouter;
