@@ -7,7 +7,11 @@ export default class validators {
                 firstName: z.string().min(1, "First name is required"),
                 lastName: z.string().min(1, "Last name is required"),
                 email: z.string().email("Invalid email"),
-                phoneNumber: z.string().min(10, "Phone number should be at least 10 characters"),
+                phoneNumber: z
+                    .number()
+                    .int()
+                    .min(1000000000, "Phone number must be exactly 10 digits long")
+                    .max(9999999999, "Phone number must be exactly 10 digits long"),
                 password: z.string().min(1, "Password should be at least 1 characters"),
             })
             .strict(),
