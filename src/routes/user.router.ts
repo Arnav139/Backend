@@ -2,10 +2,16 @@ import { Router } from "express";
 import { loginUser, registerUser, logoutUser } from "../controllers/user.controller";
 import validator from "../validation";
 import { validateRequest } from "../middlewares/validateRequest";
+import { loginLimiter } from "../middlewares/rateLimiters";
 
 const userRouter = Router();
 
-userRouter.post("/login", validateRequest(validator.userValidators.loginUserSchema), loginUser);
+userRouter.post(
+    "/login",
+    loginLimiter,
+    validateRequest(validator.userValidators.loginUserSchema),
+    loginUser
+);
 userRouter.post(
     "/register",
     validateRequest(validator.userValidators.registerUserSchema),
