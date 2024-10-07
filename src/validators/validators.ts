@@ -30,5 +30,41 @@ export default class validators{
         params: z.object({}).strict(),
         query: z.object({}).strict()
     });
+
+    static createDocument = z.object({
+        body: z.object({
+            metadata: z.object({
+                title: z.string().min(1, "Title is required"),
+                personality: z.array(z.string()).nonempty("Personality array must have at least one element"),
+                tone: z.string().min(1, "Tone is required"),
+                language: z.string().min(1, "Language is required"),
+                useCase: z.string().min(1, "Use case is required"),
+            }).strict()
+        }).strict(),
+        params: z.object({}).strict(),
+        query: z.object({}).strict()
+    });
+
+    static getDocumentsById=z.object({
+        body: z.object({
+        }).strict(),
+        params: z.object({}).strict(),
+        query: z.object({}).strict()
+    });
+
+    static deleteDocumentById=z.object({
+        body: z.object({
+        }).strict(),
+        params: z.object({}).strict(),
+        query: z.object({}).strict()
+    });
     
+    static updateDocumentIsFavourite=z.object({
+        body: z.object({
+        }).strict(),
+        params: z.object({
+            documentId:z.number({required_error:"Document Id is required"})
+        }).strict(),
+        query: z.object({}).strict()
+    });
 }

@@ -4,18 +4,25 @@ import mongoose from "mongoose";
 
 export default class document{
 
-// Create a new document
     static createDocument = async (
         userId: mongoose.Types.ObjectId,
-        content: string,
-        metadata: any
+        content: any,
+        metadata: any,
+        keyword:any
     ) => {
-        const newDocument = new DocumentModel({
-            user: userId,
-            content,
-            metadata,
-        });
-        return await newDocument.save();
+        try {
+            const newDocument = new DocumentModel({
+                user: userId,
+                content,
+                metadata,
+                keyword
+    
+            });
+            return await newDocument.save();
+            
+        } catch (error:any) {
+            throw new Error(error)
+        }
     };
 
     // Fetch documents by user ID
@@ -35,7 +42,7 @@ export default class document{
         return result !== null; // Return true if the document was found and updated
     };
 
-    // Service to update isFavorite of document by document ID and user ID
+
     static updateIsFavoriteByDocumentId = async (
         userId: mongoose.Types.ObjectId,
         documentId: string

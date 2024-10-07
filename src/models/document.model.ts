@@ -10,6 +10,11 @@ interface Metadata {
     language: string;
 }
 
+interface keyword{
+    excerpt:string,
+    keywords:string[]
+}
+
 // Define the interface for the main Document
 interface IDocument extends MongooseDocument {
     user: mongoose.Schema.Types.ObjectId; // foreign key to User model
@@ -19,6 +24,7 @@ interface IDocument extends MongooseDocument {
     isFavorite: boolean;
     createdAt?: Date;
     updatedAt?: Date;
+    keyword:keyword
 }
 
 // Define the schema for the Metadata subdocument
@@ -31,11 +37,17 @@ const MetadataSchema = new Schema({
     language: { type: String },
 });
 
+const keyword = new Schema({
+    excerpt:{type:String},
+    keywords:[{type:String}]
+});
+
 // Define the schema for the main Document
 const DocumentSchema = new Schema(
     {
         user: { type: Schema.Types.ObjectId, ref: "User", required: true },
         content: { type: String },
+        keyword: { type: keyword},
         metadata: { type: MetadataSchema },
         isDeleted: { type: Boolean, default: false },
         isFavorite: { type: Boolean, default: false },
