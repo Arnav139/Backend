@@ -30,13 +30,13 @@ export default class document{
                 .from(documents) // Define the table you're querying
                 .where(
                     and(
-                        eq(documents.user, userId), // Match by userId
+                        eq(documents.userId, userId), // Match by userId
                         eq(documents.isDeleted, false) // Only get non-deleted documents
                     )
                 )
                 .execute(); // Execute the query
     
-            return documents;
+            return getDocument;
         } catch (erro:any) {
             console.error(erro);
             throw new Error(erro);
@@ -46,17 +46,19 @@ export default class document{
     // Service to delete a document by document ID and user ID
     static deleteDocumentById = async (userId: number, documentId: number): Promise<boolean> => {
         try {
-            const result = await postgresdb
-                .update(documents) 
-                .set({ isDeleted: true })
-                .where(
-                    and(
-                        eq(documents.id, documentId), 
-                        eq(documents.user, userId)                     )
+            console.log(userId , documentId)
+            const result =  await postgresdb
+            .update(documents)
+            .set({ isDeleted: true })
+            .where(
+                and(
+                    eq(documents.id, documentId), 
+                    eq(documents.userId, userId)
                 )
-                .returning({ id: documents.id }) 
-                .execute(); 
-            return result.length > 0;
+            )
+            .returning({ id: documents.id })
+            .execute();
+            return result.length > 0
         } catch (error:any) {
             console.error(error);
             throw new Error(error);
@@ -73,7 +75,7 @@ export default class document{
                 .where(
                     and(
                         eq(documents.id, documentId),
-                        eq(documents.user, userId)
+                        eq(documents.userId, userId)
                     )
                 ).execute();
     
@@ -87,7 +89,7 @@ export default class document{
                 .where(
                     and(
                         eq(documents.id, documentId),
-                        eq(documents.user, userId)    
+                        eq(documents.userId, userId)    
                     )
                 )
                 .returning({ id: documents.id }) 

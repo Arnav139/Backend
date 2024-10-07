@@ -52,7 +52,7 @@ export default class document{
         try {
             // let userId = "66fb951822f626ed85d3db2c";
             let UserId= req.user.userId;
-            console.log(UserId)
+            // console.log(UserId)
             const { metadata} = req.body;  // Assuming these fields come from the request body
             const ai=await aiWriter(metadata.title,metadata.personality,metadata.tone) 
             let cleanedArticle;
@@ -65,7 +65,7 @@ export default class document{
             }
             const keyword = await this.extractExcerptAndKeywords(cleanedExcerpt);
             await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword);
-            res.status(201).send({status:200,message:"Document Created Successfully",data:cleanedArticle});
+            res.status(201).send({status:true,message:"Document Created Successfully",data:cleanedArticle});
         } catch (error:any) {
             console.error("Error creating document:", error);
             res.status(500).send({ status: false ,error: error.message });
@@ -77,10 +77,10 @@ export default class document{
         try {
             const userId = req.user.userId;
             const documents = await dbServices.document.getDocumentsByUserId(userId);
-            res.status(200).json(documents);
+            res.status(200).json({status:true,documents});
         } catch (error) {
             console.error("Error fetching documents:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            res.status(500).json({status:false, error: "Internal Server Error" });
         }
     };
 
@@ -89,15 +89,15 @@ export default class document{
         try {
             const userId = req.user.userId;
             const documentId = req.params.documentId;
-            const result = await dbServices.document.deleteDocumentById(userId, documentId);
+            const result = await dbServices.document.deleteDocumentById(userId, parseInt(documentId));
             if (result) {
-                res.status(200).json({ message: "Document deleted successfully" });
+                res.status(200).json({ status:true,message: "Document deleted successfully" });
             } else {
-                res.status(404).json({ message: "Document not found or not authorized to delete" });
+                res.status(404).json({status:false, message: "Document not found or not authorized to delete" });
             }
-        } catch (error) {
+        } catch (error:any) {
             console.error("Error deleting document:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            res.status(500).json({status:false, error: error.message });
         }
     };
 
@@ -106,17 +106,18 @@ export default class document{
         try {
             const userId = req.user.userId;
             const documentId = req.params.documentId;
-            const result = await dbServices.document.updateIsFavoriteByDocumentId(userId, documentId);
+            const result = await dbServices.document.updateIsFavoriteByDocumentId(userId, parseInt(documentId));
             if (result) {
-                res.status(200).json({ message: "Document isFavorite updated successfully" });
+                res.status(200).json({status:true, message: "Document isFavorite updated successfully"});
             } else {
-                res.status(404).json({
+                res.status(400).json({
+                    status:false,
                     message: "Document not found or not authorized to update isFavorite",
                 });
             }
         } catch (error) {
             console.error("Error deleting document:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            res.status(500).json({status:false, error: "Internal Server Error" });
         }
     };
 }

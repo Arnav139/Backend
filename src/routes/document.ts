@@ -14,7 +14,7 @@ router.post("/create",authenticateUser,validateRequest(validators.auth.createDoc
 router.get("/", authenticateUser,validateRequest(validators.auth.getDocumentsById) ,controller.document.getDocumentsByUserIdController);
 
 //route to delete documents by user ID
-router.delete("/:documentId", authenticateUser,validateRequest(validators.auth.deleteDocumentById) , controller.document.deleteDocumentByUserId);
+router.delete("/:documentId", authenticateUser, controller.document.deleteDocumentByUserId);
 
 //route to toggle isFavorite
 router.put("/:documentId", authenticateUser,validateRequest(validators.auth.updateDocumentIsFavourite) , controller.document.toggleIsFavoriteByDocumentId);

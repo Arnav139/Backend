@@ -63,7 +63,7 @@ export default class validators{
         body: z.object({
         }).strict(),
         params: z.object({
-            documentId:z.number({required_error:"Document Id is required"})
+            documentId:z.string({required_error:"Document Id is required"})
         }).strict(),
         query: z.object({}).strict()
     });
