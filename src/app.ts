@@ -2,10 +2,10 @@ import express from "express";
 import cors from "cors";
 import logger from "./config/logger";
 import router from "./routes";
-import envConf from "./config/envConf";
 import connectDB from "./config/db";
 
 const app = express();
+const port = process.env.port
 
 app.use(
     cors({
@@ -19,7 +19,7 @@ app.use('/', router);
 
 
 
-app.listen(envConf.port, async () => {
-    logger.info(`Server is running on port ${envConf.port}`);
-    await connectDB();
+app.listen(port, async () => {
+    logger.info(`Server is running on port ${port}`);
+    // await connectDB();
 });

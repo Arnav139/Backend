@@ -1,64 +1,54 @@
-import { User } from "../../models/user.model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import envConf from "../../config/envConf";
+import {  users, documents  } from "../../models/schema"
+import postgresdb from "../../config/db";
+import { setUser } from "../../config/jwt";
+import { eq } from "drizzle-orm";
+
 
 
 export default class user{
 
     static registerUser = async (userData: any) => {
+        try{
         const { phoneNumber, email, firstName, lastName, password } = userData;
         
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await postgresdb.query.users.findFirst({
+            where:eq(users.email,email)
+        });
+        console.log(existingUser)
         if (existingUser) {
             throw new Error("User already exists with this email");
         }
-
-        const newUser = new User({
+        // console.log(existingUser , "esrdtfyuiopfdghjklj")
+        const data = await postgresdb.insert(users).values({
             firstName,
             lastName,
             email,
             phoneNumber,
             password,
-        });
+        }).returning({email:users.email,firstName:users.firstName,lastName:users.lastName,id:users.id})
+        const token = setUser({userId:data[0].id})
+        console.log(token)
+        return token
+    }catch(error:any){
+        throw new Error(error)
 
-        return await newUser.save();
-    };
-
-    static loginUser = async (email: string, password: string) => {
-        const user = await User.findOne({ email });
-        if (!user) {
-            throw new Error("User not found");
-        }
-
-        const isPasswordValid = await user.isPasswordCorrect(password);
-        if (!isPasswordValid) {
-            throw new Error("Invalid credentials");
-        }
-
-        // Generate tokens
-        const accessToken = user.generateAccessToken();
-        const refreshToken = user.generateRefreshToken();
-
-        // Save refresh token
-        user.refreshToken = refreshToken;
-        await user.save();
-
-        return { accessToken, refreshToken, user };
-    };
-
-    static  refreshToken = async (refreshToken: string) => {
-        try {
-            const decoded = jwt.verify(refreshToken, envConf.refreshTokenSecret) as any;
-            const user = await User.findById(decoded._id);
-            if (!user) throw new Error("User not found");
-
-            // Generate new access token
-            const accessToken = user.generateAccessToken();
-            return { accessToken };
-        } catch (error) {
-            throw new Error("Invalid refresh token");
-        }
     }
+}
+
+static loginUser = async (email: string, password: string) => {
+    try {
+      const user = await postgresdb.select().from(users).where(eq(users.email, email)).limit(1);
+      if (user.length === 0) {
+        throw new Error("User not found");
+      }
+      const token = setUser({userId:user[0].id})
+      return {token}
+    } catch (error: any) {
+      throw new Error(error);
+    }
+  };
+
+   
 }

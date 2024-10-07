@@ -50,9 +50,9 @@ export default class document{
 
     static createDocumentController = async (req: AuthenticatedRequest, res: Response):Promise<any> => {
         try {
-            // const userId = req.user;
-            let userId = "66fb951822f626ed85d3db2c";
-            let UserId= new Types.ObjectId(userId);
+            // let userId = "66fb951822f626ed85d3db2c";
+            let UserId= req.user.userId;
+            console.log(UserId)
             const { metadata} = req.body;  // Assuming these fields come from the request body
             const ai=await aiWriter(metadata.title,metadata.personality,metadata.tone) 
             let cleanedArticle;
@@ -66,16 +66,16 @@ export default class document{
             const keyword = await this.extractExcerptAndKeywords(cleanedExcerpt);
             await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword);
             res.status(201).send({status:200,message:"Document Created Successfully",data:cleanedArticle});
-        } catch (error) {
+        } catch (error:any) {
             console.error("Error creating document:", error);
-            res.status(500).send({ error: "Internal Server Error" });
+            res.status(500).send({ status: false ,error: error.message });
         }
     };
 
     // Fetch documents by user ID
     static getDocumentsByUserIdController = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user;
+            const userId = req.user.userId;
             const documents = await dbServices.document.getDocumentsByUserId(userId);
             res.status(200).json(documents);
         } catch (error) {
@@ -87,7 +87,7 @@ export default class document{
     // Delete a document by user ID
     static deleteDocumentByUserId = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user;
+            const userId = req.user.userId;
             const documentId = req.params.documentId;
             const result = await dbServices.document.deleteDocumentById(userId, documentId);
             if (result) {
@@ -104,7 +104,7 @@ export default class document{
     // toggle  isFavorite of document by document ID
     static toggleIsFavoriteByDocumentId = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user;
+            const userId = req.user.userId;
             const documentId = req.params.documentId;
             const result = await dbServices.document.updateIsFavoriteByDocumentId(userId, documentId);
             if (result) {

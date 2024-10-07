@@ -1,52 +1,37 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
-import { User } from "../models/user.model";
 import jwt from "jsonwebtoken";
-import envConf from "../config/envConf";
+import dotenv from "dotenv";
 
-// Define an interface to extend Express's Request object to include 'user'
-interface AuthenticatedRequest extends Request {
-    user?: any;
-}
+dotenv.config();
 
-const verifyAccessToken: RequestHandler = async (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        // Retrieve token from cookies or Authorization header
-        const token =
-            req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+const secret = process.env.SECRET_KEY as string; // Ensure it's typed as a string
 
-        if (!token) {
-            res.status(401).json({ message: "Unauthorized: No token provided" });
-            return;
-        }
-
-        // Verify token with JWT
-        const decodedToken = jwt.verify(token, envConf.accessTokenSecret) as { _id: string };
-
-        // Find user based on decoded token _id
-        const user: any = await User.findById(decodedToken._id).select("-password");
-        if (!user) {
-            res.status(401).json({ message: "Unauthorized: User not found" });
-            return;
-        }
-        if (user.refreshToken === "") {
-            res.status(401).json({ message: "Unauthorized: Token Expired" });
-            return;
-        }
-
-        user.refreshToken = "hidden";
-        // Attach user to the request object
-        req.user = user;
-
-        // Proceed to the next middleware or route handler
-        next();
-    } catch (error) {
-        console.error("Token verification error:", error);
-        res.status(401).json({ message: "Unauthorized: Invalid token or user" });
+// Function to create a JWT for the user
+const setUser = (payload: { userId:number }) => {
+  const { userId } = payload;
+  
+  return jwt.sign(
+    {
+      userId: userId,
+    },
+    secret, // Missing comma added here
+    {
+      expiresIn: '24h', // Token will expire in 24 hours
     }
+  );
 };
 
-export { verifyAccessToken };
+// Function to verify and decode the JWT
+const getUser = (token: string) => {
+  try {
+    // Remove 'Bearer ' prefix if present (usually in Authorization headers)
+    const newToken = token.startsWith("Bearer ") ? token.slice(7) : token;
+    
+    // Verify the token using the secret
+    return jwt.verify(newToken, secret);
+  } catch (error) {
+    // Handle error appropriately (e.g., token invalid or expired)
+    throw new Error("Invalid token");
+  }
+};
+
+export { setUser, getUser };
