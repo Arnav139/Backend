@@ -8,7 +8,8 @@ const router = Router();
 
 
 // Route for creating a new document
-router.post("/create",validateRequest(validators.auth.createDocument) ,controller.document.createDocumentController);
+router.post("/create",verifyAccessToken,validateRequest(validators.auth.createDocument) ,controller.document.createDocumentController);
+router.put("/content/:documentId",verifyAccessToken ,controller.document.updateDocument);
 
 // Route for fetching documents by user ID
 router.get("/", verifyAccessToken,validateRequest(validators.auth.getDocumentsById) ,controller.document.getDocumentsByUserIdController);

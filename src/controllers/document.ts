@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import dbServices from "../services/dbServices";
 import { aiWriter } from "../helper/ai";
-import {exec, execFile} from "child_process"
-import { stdout } from "process";
-import { Types } from "mongoose";
 
 interface AuthenticatedRequest extends Request {
     user?: any;
@@ -14,47 +11,39 @@ interface AuthenticatedRequest extends Request {
  
 export default class document{
 
-// Create a new document
-    // static createDocumentController = async (req: AuthenticatedRequest, res: Response) => {
-    //     try {
-    //         const userId = req.user;
-    //         const { metadata } = req.body;
-    //         const content = "Dummy Data";
-    //         const newDocument = await dbServices.document.createDocument(userId, content, metadata);
-    //         res.status(201).json(newDocument);
-    //     } catch (error) {
-    //         console.error("Error creating document:", error);
-    //         res.status(500).json({ error: "Internal Server Error" });
-    //     }
-    // };
 
     static extractExcerptAndKeywords=async(input:any)=> {
-        // Use regex to extract the excerpt and keywords
-        const excerptMatch = input.match(/\*\*Excerpt\*\*:\s*([\s\S]*?)\n\n/);
-        const keywordsMatch = input.match(/\*\*Keywords\*\*:\s*([\s\S]*)/);
+        try {
+            // Use regex to extract the excerpt and keywords
+            const excerptMatch = input.match(/\*\*Excerpt\*\*:\s*([\s\S]*?)\n/);
+            const keywordsMatch = input.match(/\*\*Keywords\*\*:\s*([\s\S]*)\./);
+            
+            if (!excerptMatch || !keywordsMatch) {
+                console.error("Error: Could not extract excerpt or keywords");
+                return null;
+            }
         
-        if (!excerptMatch || !keywordsMatch) {
-            console.error("Error: Could not extract excerpt or keywords");
-            return null;
+            const excerpt = excerptMatch[1].trim();
+            const keywords = keywordsMatch[1].split(',').map((keyword:any) => keyword.trim());
+        
+            return {
+                excerpt: excerpt,
+                keywords: keywords
+            };
+            
+        } catch (error: any) {
+            throw new Error(error)
         }
-    
-        const excerpt = excerptMatch[1].trim();
-        const keywords = keywordsMatch[1].split(',').map((keyword:any) => keyword.trim());
-    
-        return {
-            excerpt: excerpt,
-            keywords: keywords
-        };
     }
     
 
     static createDocumentController = async (req: AuthenticatedRequest, res: Response):Promise<any> => {
         try {
-            // const userId = req.user;
-            let userId = "66fb951822f626ed85d3db2c";
-            let UserId= new Types.ObjectId(userId);
-            const { metadata} = req.body;  // Assuming these fields come from the request body
+            console.log(req.body)
+            const userId = req.user;
+            const { metadata} = req.body;  
             const ai=await aiWriter(metadata.title,metadata.personality,metadata.tone) 
+            console.log(ai,"ai")
             let cleanedArticle;
             let cleanedExcerpt;
             if (ai) {
@@ -64,23 +53,38 @@ export default class document{
                 ai.excerpt = cleanedExcerpt;
             }
             const keyword = await this.extractExcerptAndKeywords(cleanedExcerpt);
-            await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword);
-            res.status(201).send({status:200,message:"Document Created Successfully",data:cleanedArticle});
-        } catch (error) {
+            const docData=await dbServices.document.createDocument(userId, cleanedArticle, metadata,keyword);
+            res.status(200).send({status:true,message:"Document Created Successfully",data:docData});
+        } catch (error: any) {
             console.error("Error creating document:", error);
-            res.status(500).send({ error: "Internal Server Error" });
+            res.status(500).send({ error: error.message });
+        }
+    };
+
+    static updateDocument= async (req: AuthenticatedRequest, res: Response):Promise<any> => {
+        try {
+            const userId = req.user;
+            const content=req.body.content
+            const docId=req.params.documentId
+            const updatedDoc=await dbServices.document.updateDocument(userId, docId,content);
+            res.status(200).send({status:true,message:"Document Updated Successfully",data:updatedDoc});
+        } catch (error: any) {
+            console.error("Error creating document:", error);
+            res.status(500).send({ error: error.message });
         }
     };
 
     // Fetch documents by user ID
     static getDocumentsByUserIdController = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            console.log("/")
             const userId = req.user;
+            console.log(userId)
             const documents = await dbServices.document.getDocumentsByUserId(userId);
-            res.status(200).json(documents);
-        } catch (error) {
+            res.status(200).send({status:true,message:"All documents fetched",data:documents});
+        } catch (error: any) {
             console.error("Error fetching documents:", error);
-            res.status(500).json({ error: "Internal Server Error" });
+            res.status(500).json({ error: error.message });
         }
     };
 

@@ -16,7 +16,7 @@ describe("Test API Routes", () => {
      
     test("Test1: should create a user in DB via /register", async () => {
         fetchMock.mockResolvedValueOnce({
-            status: 201,
+            status: 200,
             json: async () => ({
                 status: true,
                 message: "User registered successfully"
@@ -31,7 +31,7 @@ describe("Test API Routes", () => {
             body: JSON.stringify(registerEventBody),
         });
 
-        expect(response.status).toBe(201);
+        expect(response.status).toBe(200);
         const data = await response.json();
         expect(data).toEqual({
             status: true,

@@ -28,7 +28,7 @@ export default class user{
             await newUser.save();
 
             // Return a success response
-            res.status(201).json({status:true,
+            res.status(200).json({status:true,
                 message: "User registered successfully",
                 accessToken,
                 refreshToken,
@@ -40,14 +40,7 @@ export default class user{
                 },
             });
         } catch (error: any) {
-            // Specify any type for error to access error.message
-            console.error("Registration error:", error);
-            // Check for specific error messages
-            if (error.message.includes("User already exists")) {
-                res.status(409).json({ message: error.message }); // Conflict status
-            } else {
-                res.status(500).json({ message: "Server error" }); // General server error
-            }
+            res.status(500).json({ status:false,message: error.message }); // Conflict status
         }
     };
 
@@ -60,9 +53,8 @@ export default class user{
             const user = await dbServices.user.loginUser(email , password);
             // Return the tokens and user details in the response
             res.status(200).json({status: true , message: "user Logged In" , data : user})
-        } catch (error) {
-            console.error("Login error:", error);
-            res.status(500).json({ message: "Server error" });
+        } catch (error:any) {
+            res.status(500).json({status:false, message: error.message });
         }
     };
 

@@ -25,21 +25,50 @@ export default class document{
         }
     };
 
+    static updateDocument= async (
+        userId: mongoose.Types.ObjectId,
+        docId:mongoose.Types.ObjectId,
+        content: any,        
+    ) => {
+        try {
+            const updatedDocument = await DocumentModel.findOneAndUpdate(
+                { user: userId, _id: docId },   // Query to find the document by userId
+                { content: content }, // Update the content field
+                { new: true, upsert: true } // Return the updated document, and create it if it doesn't exist
+            );
+            
+            return updatedDocument;
+            
+        } catch (error:any) {
+            throw new Error(error)
+        }
+    };
+
     // Fetch documents by user ID
     static getDocumentsByUserId = async (userId: mongoose.Types.ObjectId) => {
-        return await DocumentModel.find({ user: userId, isDeleted: false }).select("-user");
+        try {
+            return await DocumentModel.find({ user: userId, isDeleted: false }).select("-user");
+            
+        } catch (error:any) {
+            throw new Error(error)
+        }
     };
 
     // Service to delete a document by document ID and user ID
     static deleteDocumentById = async (userId: mongoose.Types.ObjectId, documentId: string) => {
-        // Find the document and update its isDeleted field to true
-        const result = await DocumentModel.findOneAndUpdate(
-            { _id: documentId, user: userId }, 
-            { isDeleted: true }, 
-            { new: true } 
-        );
+        try {
+            // Find the document and update its isDeleted field to true
+                const result = await DocumentModel.findOneAndUpdate(
+                    { _id: documentId, user: userId }, 
+                    { isDeleted: true }, 
+                    { new: true } 
+                );
 
-        return result !== null; // Return true if the document was found and updated
+                return result !== null; // Return true if the document was found and updated
+                    
+        } catch (error:any) {
+            throw new Error(error)
+        }
     };
 
 
@@ -47,14 +76,20 @@ export default class document{
         userId: mongoose.Types.ObjectId,
         documentId: string
     ) => {
-        const document = await DocumentModel.findOne({ _id: documentId, user: userId });
-        if (!document) {
-            return false;
+        try {
+            const document = await DocumentModel.findOne({ _id: documentId, user: userId });
+                if (!document) {
+                    return false;
+                }
+
+                document.isFavorite = !document.isFavorite;
+                const result = await document.save();
+
+                return result !== null;
+            
+            
+        } catch (error:any) {
+            throw new Error(error)
         }
-
-        document.isFavorite = !document.isFavorite;
-        const result = await document.save();
-
-        return result !== null;
-    };
+    }
 }
