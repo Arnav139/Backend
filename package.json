@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsc && node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "test": "jest --detectOpenHandles"
+    "test:documents": "jest --detectOpenHandles tests/documents.test.ts",
+    "test:users": "jest --detectOpenHandles tests/users.test.ts"
   },
   "keywords": [],
   "author": "",

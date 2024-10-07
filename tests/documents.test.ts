@@ -12,8 +12,8 @@ describe("Document Tests", () => {
   let documentId: string; // This will store the ID of the created document for further tests
 
   beforeAll(async () => {
-    // Create a test user and get the token
-    const testUserEmail = "test_document2_john.doe@example.com"; // Use a unique email for tests
+    // Create a unique test user email for each test run
+    const testUserEmail = `test_document2_john.doe.${Date.now()}@example.com`; // Use a unique email
     const userResponse = await request(app).post("/api/users/register").send({
       firstName: "John",
       lastName: "Doe",
@@ -41,7 +41,8 @@ describe("Document Tests", () => {
     expect(loginResponse.body.status).toBe(true);
 
     token = loginResponse.body.accessToken; // Assume the token is in the response body
-    userId = loginResponse.body.user._id; // Store the user ID for cleanup
+    userId = loginResponse.body.user.id; // Store the user ID for cleanup
+    console.log("User ID:", userId); // Check if userId is valid
   });
 
   afterEach(async () => {
@@ -86,299 +87,319 @@ describe("Document Tests", () => {
       documentId = res.body.document._id; // Store the created document ID for further tests
     });
 
-    // test("1.2: Should return validation error for missing fields", async () => {
-    //   const res = await request(app)
-    //     .post("/api/documents/create")
-    //     .set("Authorization", `Bearer ${token}`)
-    //     .send({
-    //       metadata: {
-    //         // Missing required fields
-    //       },
-    //     });
+    test("1.2: Should return validation error for missing fields", async () => {
+      const res = await request(app)
+        .post("/api/documents/create")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          metadata: {
+            // Missing required fields
+          },
+        });
 
-    //   console.log(res.body);
-    //   expect(res.status).toBe(400);
-    //   expect(res.body.errors).toHaveProperty("body.metadata.useCase");
-    // });
+      console.log(res.body);
+      expect(res.status).toBe(400);
+      expect(res.body.errors).toEqual(
+        expect.objectContaining({
+          "body.metadata.useCase": "Required",
+          "body.metadata.language": "Required",
+          "body.metadata.personality": "Required",
+          "body.metadata.primaryKey": "Required",
+          "body.metadata.researchLevel": "Required",
+          "body.metadata.tone": "Required",
+        })
+      );
+    });
 
-    // test("1.3: Should return validation error for invalid researchLevel", async () => {
-    //   const res = await request(app)
-    //     .post("/api/documents/create")
-    //     .set("Authorization", `Bearer ${token}`)
-    //     .send({
-    //       metadata: {
-    //         useCase: "Research",
-    //         primaryKey: "Document123",
-    //         researchLevel: 101, // Invalid
-    //         personality: ["curious"],
-    //         tone: ["informative"],
-    //         language: "English",
-    //       },
-    //     });
+    test("1.3: Should return validation error for invalid researchLevel", async () => {
+      const res = await request(app)
+        .post("/api/documents/create")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          metadata: {
+            useCase: "Research",
+            primaryKey: "Document123",
+            researchLevel: 101, // Invalid
+            personality: ["curious"],
+            tone: ["informative"],
+            language: "English",
+          },
+        });
 
-    //   console.log(res.body);
-    //   expect(res.status).toBe(400);
-    //   expect(res.body.errors).toHaveProperty("body.metadata.researchLevel");
-    // });
+      console.log(res.body);
+      expect(res.status).toBe(400);
+      expect(res.body.errors["body.metadata.researchLevel"]).toContain(
+        "Maximum value is 100"
+      );
+    });
 
-    // test("1.4: Should return validation error for empty personality array", async () => {
-    //   const res = await request(app)
-    //     .post("/api/documents/create")
-    //     .set("Authorization", `Bearer ${token}`)
-    //     .send({
-    //       metadata: {
-    //         useCase: "Research",
-    //         primaryKey: "Document123",
-    //         researchLevel: 5,
-    //         personality: [], // Invalid
-    //         tone: ["informative"],
-    //         language: "English",
-    //       },
-    //     });
+    test("1.4: Should return validation error for empty personality array", async () => {
+      const res = await request(app)
+        .post("/api/documents/create")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          metadata: {
+            useCase: "Research",
+            primaryKey: "Document123",
+            researchLevel: 5,
+            personality: [], // Invalid
+            tone: ["informative"],
+            language: "English",
+          },
+        });
 
-    //   console.log(res.body);
-    //   expect(res.status).toBe(400);
-    //   expect(res.body.errors).toHaveProperty("body.metadata.personality");
-    // });
+      console.log(res.body);
+      expect(res.status).toBe(400);
+      expect(res.body.errors["body.metadata.personality"]).toContain(
+        "personality array cannot be empty"
+      );
+    });
   });
 
-  // describe("2. Document Retrieval Tests", () => {
-  //   test("2.1: Should fetch documents for user", async () => {
-  //     // Create a document first
-  //     const newDoc = new DocumentModel({
-  //       user: userId,
-  //       content: "Test content",
-  //       metadata: {
-  //         useCase: "Test Use Case",
-  //         primaryKey: "Test123",
-  //         researchLevel: 5,
-  //         personality: ["friendly"],
-  //         tone: ["casual"],
-  //         language: "English",
-  //       },
-  //     });
-  //     await newDoc.save();
+  describe("2. Document Retrieval Tests", () => {
+    test("2.1: Should fetch documents for user", async () => {
+      // Create a document first
+      const newDoc = new DocumentModel({
+        user: userId,
+        content: "Test content",
+        metadata: {
+          useCase: "Test Use Case",
+          primaryKey: "Test123",
+          researchLevel: 5,
+          personality: ["friendly"],
+          tone: ["casual"],
+          language: "English",
+        },
+      });
+      await newDoc.save();
 
-  //     const res = await request(app)
-  //       .get("/api/documents")
-  //       .set("Authorization", `Bearer ${token}`);
-  //     expect(res.status).toBe(200);
-  //     expect(res.body.status).toBe(true);
-  //     expect(res.body.documents).toHaveLength(1);
-  //   });
+      const res = await request(app)
+        .get("/api/documents")
+        .set("Authorization", `Bearer ${token}`);
 
-  //   test("2.2: Should return 404 for non-existent user", async () => {
-  //     // Try fetching documents for a non-existent user
-  //     const nonExistentToken = "invalidToken"; // This token should not correspond to any valid user
+      console.log(res.body);
 
-  //     const res = await request(app)
-  //       .get("/api/documents")
-  //       .set("Authorization", `Bearer ${nonExistentToken}`);
-  //     expect(res.status).toBe(404);
-  //     expect(res.body.status).toBe(false);
-  //     expect(res.body.message).toBe("User not found");
-  //   });
-  // });
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe(true);
+      expect(res.body.documents).toHaveLength(1);
+    });
 
-  // describe("3. Document Deletion Tests", () => {
-  //   test("3.1: Should delete a document successfully", async () => {
-  //     const newDoc = new DocumentModel({
-  //       user: userId,
-  //       content: "Test content to delete",
-  //       metadata: {
-  //         useCase: "Test Use Case",
-  //         primaryKey: "Test123",
-  //         researchLevel: 5,
-  //         personality: ["friendly"],
-  //         tone: ["casual"],
-  //         language: "English",
-  //       },
-  //     });
-  //     // Use type assertion when saving
-  //     const savedDoc = await newDoc.save(); // Assertion here
-  //     documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
+    test("2.2: Should return 404 for non-existent user", async () => {
+      // Try fetching documents for a non-existent user
+      const nonExistentToken = "invalidToken"; // This token should not correspond to any valid user
 
-  //     const res = await request(app)
-  //       .delete(`/api/documents/${documentId}`)
-  //       .set("Authorization", `Bearer ${token}`);
-  //     expect(res.status).toBe(200);
-  //     expect(res.body.status).toBe(true);
-  //     expect(res.body.message).toBe("Document deleted successfully");
+      const res = await request(app)
+        .get("/api/documents")
+        .set("Authorization", `Bearer ${nonExistentToken}`);
 
-  //     // Check if the document is indeed marked as deleted
-  //     const deletedDoc = await DocumentModel.findById(documentId);
-  //     expect(deletedDoc).toBeNull();
-  //   });
+      console.log(res.body);
 
-  //   test("3.2: Should return 404 for deleting non-existent document", async () => {
-  //     const res = await request(app)
-  //       .delete(`/api/documents/${new mongoose.Types.ObjectId()}`)
-  //       .set("Authorization", `Bearer ${token}`);
-  //     expect(res.status).toBe(404);
-  //     expect(res.body.status).toBe(false);
-  //     expect(res.body.message).toBe(
-  //       "Document not found or not authorized to delete"
-  //     );
-  //   });
+      expect(res.status).toBe(401);
 
-  //   test("3.3: Should return 403 for unauthorized document deletion", async () => {
-  //     const otherUserId = new mongoose.Types.ObjectId(); // Simulate another user ID
-  //     const newDoc = new DocumentModel({
-  //       user: otherUserId,
-  //       content: "Test content for unauthorized delete",
-  //       metadata: {
-  //         useCase: "Test Use Case",
-  //         primaryKey: "Test123",
-  //         researchLevel: 5,
-  //         personality: ["friendly"],
-  //         tone: ["casual"],
-  //         language: "English",
-  //       },
-  //     });
-  //     const savedDoc = await newDoc.save();
-  //     documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
+      expect(res.body.message).toBe("Unauthorized: Invalid token or user");
+    });
+  });
 
-  //     const res = await request(app)
-  //       .delete(`/api/documents/${documentId}`)
-  //       .set("Authorization", `Bearer ${token}`); // Authenticated as another user
-  //     expect(res.status).toBe(404);
-  //     expect(res.body.status).toBe(false);
-  //     expect(res.body.message).toBe(
-  //       "Document not found or not authorized to delete"
-  //     );
-  //   });
-  // });
+  describe("3. Document Deletion Tests", () => {
+    test("3.1: Should delete a document successfully", async () => {
+      const newDoc = new DocumentModel({
+        user: userId,
+        content: "Test content to delete",
+        metadata: {
+          useCase: "Test Use Case",
+          primaryKey: "Test123",
+          researchLevel: 5,
+          personality: ["friendly"],
+          tone: ["casual"],
+          language: "English",
+        },
+      });
+      // Use type assertion when saving
+      const savedDoc = await newDoc.save(); // Assertion here
+      documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
 
-  // describe("4. Toggle Favorite Tests", () => {
-  //   test("4.1: Should toggle favorite status successfully", async () => {
-  //     const newDoc = new DocumentModel({
-  //       user: userId,
-  //       content: "Test content to toggle favorite",
-  //       metadata: {
-  //         useCase: "Test Use Case",
-  //         primaryKey: "Test123",
-  //         researchLevel: 5,
-  //         personality: ["friendly"],
-  //         tone: ["casual"],
-  //         language: "English",
-  //       },
-  //     });
-  //     const savedDoc = await newDoc.save();
-  //     documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
+      const res = await request(app)
+        .delete(`/api/documents/${documentId}`)
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe(true);
+      expect(res.body.message).toBe("Document deleted successfully");
 
-  //     const res = await request(app)
-  //       .patch(`/api/documents/${documentId}/toggle-favorite`)
-  //       .set("Authorization", `Bearer ${token}`);
-  //     expect(res.status).toBe(200);
-  //     expect(res.body.status).toBe(true);
-  //     expect(res.body.message).toBe("Document isFavorite updated successfully");
-  //   });
+      // Check if the document is indeed marked as deleted
+      const deletedDoc = await DocumentModel.findById(documentId);
+      expect(deletedDoc).not.toBeNull(); // Check that it still exists
+      if (deletedDoc) {
+        expect(deletedDoc.isDeleted).toBe(true); // Ensure it is marked as deleted
+      }
+    });
 
-  //   test("4.2: Should return 404 for toggling favorite of non-existent document", async () => {
-  //     const res = await request(app)
-  //       .patch(
-  //         `/api/documents/${new mongoose.Types.ObjectId()}/toggle-favorite`
-  //       )
-  //       .set("Authorization", `Bearer ${token}`);
-  //     expect(res.status).toBe(404);
-  //     expect(res.body.status).toBe(false);
-  //     expect(res.body.message).toBe(
-  //       "Document not found or not authorized to update isFavorite"
-  //     );
-  //   });
+    test("3.2: Should return 404 for deleting non-existent document", async () => {
+      const res = await request(app)
+        .delete(`/api/documents/${new mongoose.Types.ObjectId()}`)
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe(false);
+      expect(res.body.message).toBe(
+        "Document not found or not authorized to delete"
+      );
+    });
 
-  //   test("4.3: Should return 404 for unauthorized favorite toggle", async () => {
-  //     const otherUserId = new mongoose.Types.ObjectId(); // Simulate another user ID
-  //     const newDoc = new DocumentModel({
-  //       user: otherUserId,
-  //       content: "Test content for unauthorized favorite toggle",
-  //       metadata: {
-  //         useCase: "Test Use Case",
-  //         primaryKey: "Test123",
-  //         researchLevel: 5,
-  //         personality: ["friendly"],
-  //         tone: ["casual"],
-  //         language: "English",
-  //       },
-  //     });
-  //     const savedDoc = await newDoc.save();
-  //     documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
+    test("3.3: Should return 403 for unauthorized document deletion", async () => {
+      const otherUserId = new mongoose.Types.ObjectId(); // Simulate another user ID
+      const newDoc = new DocumentModel({
+        user: otherUserId,
+        content: "Test content for unauthorized delete",
+        metadata: {
+          useCase: "Test Use Case",
+          primaryKey: "Test123",
+          researchLevel: 5,
+          personality: ["friendly"],
+          tone: ["casual"],
+          language: "English",
+        },
+      });
+      const savedDoc = await newDoc.save();
+      documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
 
-  //     const res = await request(app)
-  //       .patch(`/api/documents/${documentId}/toggle-favorite`)
-  //       .set("Authorization", `Bearer ${token}`); // Authenticated as another user
-  //     expect(res.status).toBe(404);
-  //     expect(res.body.status).toBe(false);
-  //     expect(res.body.message).toBe(
-  //       "Document not found or not authorized to update isFavorite"
-  //     );
-  //   });
-  // });
+      const res = await request(app)
+        .delete(`/api/documents/${documentId}`)
+        .set("Authorization", `Bearer ${token}`); // Authenticated as another user
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe(false);
+      expect(res.body.message).toBe(
+        "Document not found or not authorized to delete"
+      );
+    });
+  });
 
-  // describe("5. Document Update Tests", () => {
-  //   test("5.1: Should update document content successfully", async () => {
-  //     const newDoc = new DocumentModel({
-  //       user: userId,
-  //       content: "Test content to update",
-  //       metadata: {
-  //         useCase: "Test Use Case",
-  //         primaryKey: "Test123",
-  //         researchLevel: 5,
-  //         personality: ["friendly"],
-  //         tone: ["casual"],
-  //         language: "English",
-  //       },
-  //     });
-  //     const savedDoc = await newDoc.save();
-  //     documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
+  describe("4. Toggle Favorite Tests", () => {
+    test("4.1: Should toggle favorite status successfully", async () => {
+      const newDoc = new DocumentModel({
+        user: userId,
+        content: "Test content to toggle favorite",
+        metadata: {
+          useCase: "Test Use Case",
+          primaryKey: "Test123",
+          researchLevel: 5,
+          personality: ["friendly"],
+          tone: ["casual"],
+          language: "English",
+        },
+      });
+      const savedDoc = await newDoc.save();
+      documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
 
-  //     const res = await request(app)
-  //       .patch(`/api/documents/${documentId}`)
-  //       .set("Authorization", `Bearer ${token}`)
-  //       .send({ content: "Updated content" });
-  //     expect(res.status).toBe(200);
-  //     expect(res.body.status).toBe(true);
-  //     expect(res.body.message).toBe("Document content updated successfully");
-  //   });
+      const res = await request(app)
+        .put(`/api/documents/${documentId}`)
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe(true);
+      expect(res.body.message).toBe("Document isFavorite updated successfully");
+    });
 
-  //   test("5.2: Should return 404 for updating non-existent document", async () => {
-  //     const res = await request(app)
-  //       .patch(`/api/documents/${new mongoose.Types.ObjectId()}`)
-  //       .set("Authorization", `Bearer ${token}`)
-  //       .send({ content: "Some content" });
-  //     expect(res.status).toBe(404);
-  //     expect(res.body.status).toBe(false);
-  //     expect(res.body.message).toBe(
-  //       "Document not found or not authorized to update content"
-  //     );
-  //   });
+    test("4.2: Should return 404 for toggling favorite of non-existent document", async () => {
+      const res = await request(app)
+        .put(`/api/documents/${new mongoose.Types.ObjectId()}`)
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe(false);
+      expect(res.body.message).toBe(
+        "Document not found or not authorized to update isFavorite"
+      );
+    });
 
-  //   test("5.3: Should return 404 for unauthorized document update", async () => {
-  //     const otherUserId = new mongoose.Types.ObjectId(); // Simulate another user ID
-  //     const newDoc = new DocumentModel({
-  //       user: otherUserId,
-  //       content: "Test content for unauthorized update",
-  //       metadata: {
-  //         useCase: "Test Use Case",
-  //         primaryKey: "Test123",
-  //         researchLevel: 5,
-  //         personality: ["friendly"],
-  //         tone: ["casual"],
-  //         language: "English",
-  //       },
-  //     });
-  //     const savedDoc = await newDoc.save();
-  //     documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
+    test("4.3: Should return 404 for unauthorized favorite toggle", async () => {
+      const otherUserId = new mongoose.Types.ObjectId(); // Simulate another user ID
+      const newDoc = new DocumentModel({
+        user: otherUserId,
+        content: "Test content for unauthorized favorite toggle",
+        metadata: {
+          useCase: "Test Use Case",
+          primaryKey: "Test123",
+          researchLevel: 5,
+          personality: ["friendly"],
+          tone: ["casual"],
+          language: "English",
+        },
+      });
+      const savedDoc = await newDoc.save();
+      documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
 
-  //     const res = await request(app)
-  //       .patch(`/api/documents/${documentId}`)
-  //       .set("Authorization", `Bearer ${token}`) // Authenticated as another user
-  //       .send({ content: "Some new content" });
-  //     expect(res.status).toBe(404);
-  //     expect(res.body.status).toBe(false);
-  //     expect(res.body.message).toBe(
-  //       "Document not found or not authorized to update content"
-  //     );
-  //   });
-  // });
+      const res = await request(app)
+        .put(`/api/documents/${documentId}`)
+        .set("Authorization", `Bearer ${token}`); // Authenticated as another user
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe(false);
+      expect(res.body.message).toBe(
+        "Document not found or not authorized to update isFavorite"
+      );
+    });
+  });
+
+  describe("5. Document Update Tests", () => {
+    test("5.1: Should update document content successfully", async () => {
+      const newDoc = new DocumentModel({
+        user: userId,
+        content: "Test content to update",
+        metadata: {
+          useCase: "Test Use Case",
+          primaryKey: "Test123",
+          researchLevel: 5,
+          personality: ["friendly"],
+          tone: ["casual"],
+          language: "English",
+        },
+      });
+      const savedDoc = await newDoc.save();
+      documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
+
+      const res = await request(app)
+        .put(`/api/documents/updateContent/${documentId}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ content: "Updated content" });
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe(true);
+      expect(res.body.message).toBe("Document content updated successfully");
+    });
+
+    test("5.2: Should return 404 for updating non-existent document", async () => {
+      const res = await request(app)
+        .put(`/api/documents/updateContent/${new mongoose.Types.ObjectId()}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ content: "Some content" });
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe(false);
+      expect(res.body.message).toBe(
+        "Document not found or not authorized to update content"
+      );
+    });
+
+    test("5.3: Should return 404 for unauthorized document update", async () => {
+      const otherUserId = new mongoose.Types.ObjectId(); // Simulate another user ID
+      const newDoc = new DocumentModel({
+        user: otherUserId,
+        content: "Test content for unauthorized update",
+        metadata: {
+          useCase: "Test Use Case",
+          primaryKey: "Test123",
+          researchLevel: 5,
+          personality: ["friendly"],
+          tone: ["casual"],
+          language: "English",
+        },
+      });
+      const savedDoc = await newDoc.save();
+      documentId = (savedDoc._id as mongoose.Types.ObjectId).toString(); // Store the document ID
+
+      const res = await request(app)
+        .put(`/api/documents/updateContent/${documentId}`)
+        .set("Authorization", `Bearer ${token}`) // Authenticated as another user
+        .send({ content: "Some new content" });
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe(false);
+      expect(res.body.message).toBe(
+        "Document not found or not authorized to update content"
+      );
+    });
+  });
 });
