@@ -4,133 +4,146 @@ import { registerUser as registerUserService } from "../services/dbServices/user
 
 // Controller for handling user login
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    try {
-        // Check if the user exists
-        const user = await User.findOne({ email });
-        if (!user) {
-            res.status(404).json({ status: false, message: "User not found" });
-            return;
-        }
-
-        // Check if the entered password is correct
-        const isPasswordCorrect = await user.isPasswordCorrect(password);
-        if (!isPasswordCorrect) {
-            res.status(400).json({ status: false, message: "Invalid credentials" });
-            return;
-        }
-
-        // Generate access token and refresh token using secrets from envConf
-        const accessToken = user.generateAccessToken(); // Use the method from the User model
-        const refreshToken = user.generateRefreshToken(); // Use the method from the User model
-
-        // Save the refresh token to the user document in the database
-        user.refreshToken = refreshToken;
-        await user.save();
-
-        // Return the tokens and user details in the response
-        res.status(200).json({
-            status: true,
-            message: "Login successful",
-            accessToken,
-            refreshToken,
-            user: {
-                id: user._id,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-            },
-        });
-    } catch (error) {
-        console.error("Login error:", error);
-        const message = error instanceof Error ? error.message : "Internal Server Error";
-        res.status(500).json({ status: false, message });
+  try {
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ status: false, message: "User not found" });
+      return;
     }
+
+    // Check if the entered password is correct
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
+    if (!isPasswordCorrect) {
+      res.status(400).json({ status: false, message: "Invalid credentials" });
+      return;
+    }
+
+    // Generate access token and refresh token using secrets from envConf
+    const accessToken = user.generateAccessToken(); // Use the method from the User model
+    const refreshToken = user.generateRefreshToken(); // Use the method from the User model
+
+    // Save the refresh token to the user document in the database
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // Return the tokens and user details in the response
+    res.status(200).json({
+      status: true,
+      message: "Login successful",
+      accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error";
+    res.status(500).json({ status: false, message });
+  }
 };
 
 // Controller for handling user registration
-export const registerUser = async (req: Request, res: Response): Promise<void> => {
-    const { firstName, lastName, email, phoneNumber, password } = req.body;
+export const registerUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { firstName, lastName, email, phoneNumber, password } = req.body;
 
-    try {
-        // Call the service to register a new user
-        const newUser = await registerUserService({
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            password,
-        });
+  console.log("Register User Called");
 
-        // Generate access token and refresh token using secrets from envConf
-        const accessToken = newUser.generateAccessToken(); // Use the method from the User model
-        const refreshToken = newUser.generateRefreshToken(); // Use the method from the User model
+  try {
+    // Call the service to register a new user
+    const newUser = await registerUserService({
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      password,
+    });
 
-        // Save the refresh token to the newUser document in the database
-        newUser.refreshToken = refreshToken;
-        await newUser.save();
+    // Generate access token and refresh token using secrets from envConf
+    const accessToken = newUser.generateAccessToken(); // Use the method from the User model
+    const refreshToken = newUser.generateRefreshToken(); // Use the method from the User model
 
-        // Return a success response
-        res.status(201).json({
-            status: true,
-            message: "User registered successfully",
-            accessToken,
-            refreshToken,
-            user: {
-                id: newUser._id,
-                email: newUser.email,
-                firstName: newUser.firstName,
-                lastName: newUser.lastName,
-            },
-        });
-    } catch (error: any) {
-        console.error("Registration error:", error);
+    // Save the refresh token to the newUser document in the database
+    newUser.refreshToken = refreshToken;
+    await newUser.save();
 
-        if (error.message.includes("User already exists")) {
-            res.status(409).json({ status: false, message: error.message });
-        } else {
-            const message = error instanceof Error ? error.message : "Internal Server Error";
-            res.status(500).json({ status: false, message });
-        }
+    // Return a success response
+    res.status(201).json({
+      status: true,
+      message: "User registered successfully",
+      accessToken,
+      refreshToken,
+      user: {
+        id: newUser._id,
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+      },
+    });
+  } catch (error: any) {
+    console.error("Registration error:", error);
+
+    if (error.message.includes("User already exists")) {
+      res.status(409).json({ status: false, message: error.message });
+    } else {
+      const message =
+        error instanceof Error ? error.message : "Internal Server Error";
+      res.status(500).json({ status: false, message });
     }
+  }
 };
 
 // Controller for handling user logout
-export const logoutUser = async (req: Request, res: Response): Promise<void> => {
-    const { refreshToken } = req.body;
+export const logoutUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { refreshToken } = req.body;
 
-    if (!refreshToken) {
-        res.status(400).json({ status: false, message: "Refresh token is required" });
-        return;
+  if (!refreshToken) {
+    res
+      .status(400)
+      .json({ status: false, message: "Refresh token is required" });
+    return;
+  }
+
+  try {
+    // Find the user associated with the given refresh token
+    const user = await User.findOne({ refreshToken });
+
+    if (!user) {
+      res.status(404).json({
+        status: false,
+        message: "User not found or already logged out",
+      });
+      return;
     }
 
-    try {
-        // Find the user associated with the given refresh token
-        const user = await User.findOne({ refreshToken });
+    console.log("user before logout", user);
 
-        if (!user) {
-            res.status(404).json({
-                status: false,
-                message: "User not found or already logged out",
-            });
-            return;
-        }
+    user.refreshToken = "";
 
-        console.log("user before logout", user);
+    console.log("user after logout", user);
+    await user.save();
 
-        user.refreshToken = "";
-
-        console.log("user after logout", user);
-        await user.save();
-
-        res.status(200).json({
-            status: true,
-            message: "Logout successful",
-        });
-    } catch (error) {
-        console.error("Logout error:", error);
-        const message = error instanceof Error ? error.message : "Internal Server Error";
-        res.status(500).json({ status: false, message });
-    }
+    res.status(200).json({
+      status: true,
+      message: "Logout successful",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error";
+    res.status(500).json({ status: false, message });
+  }
 };
