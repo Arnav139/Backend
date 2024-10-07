@@ -2,3 +2,5 @@
 node_modules
 app.log
 groqAPIs.json
+test
+jest.config.ts
