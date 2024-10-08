@@ -1,5 +1,5 @@
 import postgresdb from "../../config/db";
-import DocumentModel from "../../models/document.model"; 
+// import DocumentModel from "../../models/document.model"; 
 import mongoose from "mongoose";
 import { documents } from "../../models/schema";
 import {and, desc, eq, inArray, sql,ne,asc} from "drizzle-orm";

@@ -62,10 +62,13 @@ export default class Validators {
         query: z.object({}).strict(),
     });
 
-    static deleteDocumentById = z.object({
-        body: z.object({}).strict(),
-        params: z.object({}).strict(),
-        query: z.object({}).strict(),
+    static deleteDocumentById=z.object({
+        body: z.object({
+        }).strict(),
+        params: z.object({
+            documentId:z.string({required_error:"Document Id is required"})
+        }).strict(),
+        query: z.object({}).strict()
     });
 
     static updateDocumentIsFavourite = z.object({
