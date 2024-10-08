@@ -26,15 +26,15 @@ export default class Validators {
         query: z.object({}).strict(),
     });
 
-    static logoutUserSchema = z.object({
-        body: z
-            .object({
-                refreshToken: z.string().min(1, "Refresh token is required"),
-            })
-            .strict(),
-        params: z.object({}).strict(),
-        query: z.object({}).strict(),
-    });
+    // static logoutUserSchema = z.object({
+    //     body: z
+    //         .object({
+    //             refreshToken: z.string().min(1, "Refresh token is required"),
+    //         })
+    //         .strict(),
+    //     params: z.object({}).strict(),
+    //     query: z.object({}).strict(),
+    // });
 
     static createDocument = z.object({
         body: z
@@ -62,13 +62,14 @@ export default class Validators {
         query: z.object({}).strict(),
     });
 
-    static deleteDocumentById=z.object({
-        body: z.object({
-        }).strict(),
-        params: z.object({
-            documentId:z.string({required_error:"Document Id is required"})
-        }).strict(),
-        query: z.object({}).strict()
+    static deleteDocumentById = z.object({
+        body: z.object({}).strict(),
+        params: z
+            .object({
+                documentId: z.string({ required_error: "Document Id is required" }),
+            })
+            .strict(),
+        query: z.object({}).strict(),
     });
 
     static updateDocumentIsFavourite = z.object({
