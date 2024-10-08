@@ -12,7 +12,7 @@ interface AuthenticatedRequest extends Request {
 }
 
  
-export default class document{
+export default class Document{
 
 // Create a new document
     // static createDocumentController = async (req: AuthenticatedRequest, res: Response) => {
@@ -93,7 +93,7 @@ export default class document{
             if (result) {
                 res.status(200).json({ status:true,message: "Document deleted successfully" });
             } else {
-                res.status(404).json({status:false, message: "Document not found or not authorized to delete" });
+                res.status(400).json({status:false, message: "Document not found or not authorized to delete" });
             }
         } catch (error:any) {
             console.error("Error deleting document:", error);

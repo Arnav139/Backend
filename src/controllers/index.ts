@@ -1,7 +1,7 @@
-import user from './user';
-import document from './document';
+import user from "./user";
+import document from "./document";
 
 export default {
-    user , 
-    document
-}
+    user,
+    document,
+};

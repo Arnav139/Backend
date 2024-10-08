@@ -6,7 +6,7 @@ import {and, desc, eq, inArray, sql,ne,asc} from "drizzle-orm";
 
 
 
-export default class document{
+export default class Document{
 
     static createDocument = async (userId:string,content:any,metadata:any,keyword:any) => {
         try {
