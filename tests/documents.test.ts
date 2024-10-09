@@ -184,7 +184,7 @@ describe("Document Tests", () => {
       expect(res.body.documents).toHaveLength(1);
     });
 
-    test("2.2: Should return 404 for non-existent user", async () => {
+    test("2.2: Should return 401 for non-existent user", async () => {
       // Try fetching documents for a non-existent user
       const nonExistentToken = "invalidToken"; // This token should not correspond to any valid user
 
