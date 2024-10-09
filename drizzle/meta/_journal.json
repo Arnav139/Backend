@@ -8,6 +8,13 @@
       "when": 1728308276068,
       "tag": "0000_productive_exiles",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1728469630350,
+      "tag": "0001_perfect_terrax",
+      "breakpoints": true
     }
   ]
 }
