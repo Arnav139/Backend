@@ -133,3 +133,4 @@ export const updateDocumentByDocumentId = async (req: AuthenticatedRequest, res:
         res.status(500).json({ status: false, message });
     }
 };
+

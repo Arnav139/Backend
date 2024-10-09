@@ -1,10 +1,12 @@
 import express from "express";
 import cors from "cors";
+import logger from "./config/logger";
+import router from "./routes";
 import connectDB from "./config/db";
 import routes from "./routes";
 
 const app = express();
-const port = 8000;
+const port = process.env.port
 
 app.use(
     cors({
@@ -14,9 +16,11 @@ app.use(
 );
 
 app.use(express.json());
-app.use("/", routes);
+app.use('/', router);
+
+
 
 app.listen(port, async () => {
-    await connectDB();
-    console.log(`Server is running on port ${port}`);
+    logger.info(`Server is running on port ${port}`);
+    // await connectDB();
 });

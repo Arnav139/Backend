@@ -71,3 +71,4 @@ export const updateContentByDocumentId = async (
 
     return result !== null;
 };
+

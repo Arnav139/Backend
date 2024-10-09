@@ -1,17 +1,31 @@
-import { Router } from "express";
-import Documentrouter from "./document.router";
-import userRouter from "./user.router";
+import express from 'express';
+import userROutes from './user'
+import docRoutes from './document'
 
-const router = Router();
 
-router.get("/", (req, res) => {
-    res.send(`
-    <h1>Welcome to the Home Page</h1>
-    <p>This is Home API of Backend Task.</p>
-  `);
+const router = express.Router();
+
+
+const defaultRoutes = [
+  {
+    path: '/user',
+    route: userROutes,
+  },
+  {
+    path: '/documents',
+    route: docRoutes,
+  },
+
+];
+
+router.get("/",async(req,res):Promise<any>=>{
+    return res.status(200).send({ status:true, message: "Api is running" });
 });
 
-router.use("/api/documents", Documentrouter);
-router.use("/api/users", userRouter);
+defaultRoutes.forEach((route) => {
+  router.use(route.path, route.route);
+});
+
+
 
 export default router;

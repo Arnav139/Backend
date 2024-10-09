@@ -14,3 +14,4 @@ userRouter.post(
 userRouter.post("/logout", validateRequest(validator.userValidators.logoutUserSchema), logoutUser);
 
 export default userRouter;
+

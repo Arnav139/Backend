@@ -134,3 +134,4 @@ export const logoutUser = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({ status: false, message });
     }
 };
+
