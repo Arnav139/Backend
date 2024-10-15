@@ -2,7 +2,7 @@ import { pgTable, serial, varchar, text, integer, jsonb, timestamp, boolean } fr
 import { sql , relations } from 'drizzle-orm';
 
 // Define User table
-export const users = pgTable('userss', {
+export const users = pgTable('userss' , {
     id: serial('id').primaryKey(),
     firstName: varchar('first_name', { length: 255 }).notNull(),
     lastName: varchar('last_name', { length: 255 }).notNull(),
