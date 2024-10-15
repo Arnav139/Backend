@@ -22,7 +22,7 @@ describe("Document Tests", () => {
       password: "password123",
     });
 
-    console.log(userResponse.body);
+    console.log("User Response : ", userResponse.body);
 
     // Ensure user registration was successful and get the token
     expect(userResponse.status).toBe(201);
@@ -35,14 +35,14 @@ describe("Document Tests", () => {
       password: "password123",
     });
 
-    console.log(loginResponse.body);
+    console.log("User LoggedIn : ", loginResponse.body);
 
     expect(loginResponse.status).toBe(200);
     expect(loginResponse.body.status).toBe(true);
 
     token = loginResponse.body.accessToken; // Assume the token is in the response body
     userId = loginResponse.body.user.id; // Store the user ID for cleanup
-    console.log("User ID:", userId); // Check if userId is valid
+    console.log("User ID : ", userId); // Check if userId is valid
   });
 
   afterEach(async () => {
@@ -79,7 +79,7 @@ describe("Document Tests", () => {
           },
         });
 
-      console.log(res.body);
+      console.log("1.1: Should create a document successfully : ", res.body);
 
       expect(res.status).toBe(201);
       expect(res.body.status).toBe(true);
@@ -97,7 +97,10 @@ describe("Document Tests", () => {
           },
         });
 
-      console.log(res.body);
+      console.log(
+        "1.2: Should return validation error for missing fields : ",
+        res.body
+      );
       expect(res.status).toBe(400);
       expect(res.body.errors).toEqual(
         expect.objectContaining({
@@ -126,7 +129,10 @@ describe("Document Tests", () => {
           },
         });
 
-      console.log(res.body);
+      console.log(
+        "1.3: Should return validation error for invalid researchLevel : ",
+        res.body
+      );
       expect(res.status).toBe(400);
       expect(res.body.errors["body.metadata.researchLevel"]).toContain(
         "Maximum value is 100"
@@ -148,7 +154,10 @@ describe("Document Tests", () => {
           },
         });
 
-      console.log(res.body);
+      console.log(
+        "1.4: Should return validation error for empty personality array : ",
+        res.body
+      );
       expect(res.status).toBe(400);
       expect(res.body.errors["body.metadata.personality"]).toContain(
         "personality array cannot be empty"
@@ -177,7 +186,7 @@ describe("Document Tests", () => {
         .get("/api/documents")
         .set("Authorization", `Bearer ${token}`);
 
-      console.log(res.body);
+      console.log("2.1: Should fetch documents for user : ", res.body);
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe(true);
@@ -192,7 +201,7 @@ describe("Document Tests", () => {
         .get("/api/documents")
         .set("Authorization", `Bearer ${nonExistentToken}`);
 
-      console.log(res.body);
+      console.log("2.2: Should return 401 for non-existent user : ", res.body);
 
       expect(res.status).toBe(401);
 
@@ -221,6 +230,9 @@ describe("Document Tests", () => {
       const res = await request(app)
         .delete(`/api/documents/${documentId}`)
         .set("Authorization", `Bearer ${token}`);
+
+      console.log("3.1: Should delete a document successfully : ", res.body);
+
       expect(res.status).toBe(200);
       expect(res.body.status).toBe(true);
       expect(res.body.message).toBe("Document deleted successfully");
@@ -237,6 +249,12 @@ describe("Document Tests", () => {
       const res = await request(app)
         .delete(`/api/documents/${new mongoose.Types.ObjectId()}`)
         .set("Authorization", `Bearer ${token}`);
+
+      console.log(
+        "3.2: Should return 404 for deleting non-existent document : ",
+        res.body
+      );
+
       expect(res.status).toBe(404);
       expect(res.body.status).toBe(false);
       expect(res.body.message).toBe(
@@ -264,6 +282,12 @@ describe("Document Tests", () => {
       const res = await request(app)
         .delete(`/api/documents/${documentId}`)
         .set("Authorization", `Bearer ${token}`); // Authenticated as another user
+
+      console.log(
+        "3.3: Should return 403 for unauthorized document deletion : ",
+        res.body
+      );
+
       expect(res.status).toBe(404);
       expect(res.body.status).toBe(false);
       expect(res.body.message).toBe(
@@ -292,6 +316,12 @@ describe("Document Tests", () => {
       const res = await request(app)
         .put(`/api/documents/${documentId}`)
         .set("Authorization", `Bearer ${token}`);
+
+      console.log(
+        "4.1: Should toggle favorite status successfully : ",
+        res.body
+      );
+
       expect(res.status).toBe(200);
       expect(res.body.status).toBe(true);
       expect(res.body.message).toBe("Document isFavorite updated successfully");
@@ -301,6 +331,12 @@ describe("Document Tests", () => {
       const res = await request(app)
         .put(`/api/documents/${new mongoose.Types.ObjectId()}`)
         .set("Authorization", `Bearer ${token}`);
+
+      console.log(
+        "4.2: Should return 404 for toggling favorite of non-existent document : ",
+        res.body
+      );
+
       expect(res.status).toBe(404);
       expect(res.body.status).toBe(false);
       expect(res.body.message).toBe(
@@ -328,6 +364,11 @@ describe("Document Tests", () => {
       const res = await request(app)
         .put(`/api/documents/${documentId}`)
         .set("Authorization", `Bearer ${token}`); // Authenticated as another user
+      console.log(
+        "4.3: Should return 404 for unauthorized favorite toggle : ",
+        res.body
+      );
+
       expect(res.status).toBe(404);
       expect(res.body.status).toBe(false);
       expect(res.body.message).toBe(
@@ -357,6 +398,11 @@ describe("Document Tests", () => {
         .put(`/api/documents/updateContent/${documentId}`)
         .set("Authorization", `Bearer ${token}`)
         .send({ content: "Updated content" });
+      console.log(
+        "5.1: Should update document content successfully : ",
+        res.body
+      );
+
       expect(res.status).toBe(200);
       expect(res.body.status).toBe(true);
       expect(res.body.message).toBe("Document content updated successfully");
@@ -367,6 +413,11 @@ describe("Document Tests", () => {
         .put(`/api/documents/updateContent/${new mongoose.Types.ObjectId()}`)
         .set("Authorization", `Bearer ${token}`)
         .send({ content: "Some content" });
+      console.log(
+        "5.2: Should return 404 for updating non-existent document : ",
+        res.body
+      );
+
       expect(res.status).toBe(404);
       expect(res.body.status).toBe(false);
       expect(res.body.message).toBe(
@@ -395,6 +446,11 @@ describe("Document Tests", () => {
         .put(`/api/documents/updateContent/${documentId}`)
         .set("Authorization", `Bearer ${token}`) // Authenticated as another user
         .send({ content: "Some new content" });
+      console.log(
+        "5.3: Should return 404 for unauthorized document update : ",
+        res.body
+      );
+
       expect(res.status).toBe(404);
       expect(res.body.status).toBe(false);
       expect(res.body.message).toBe(
