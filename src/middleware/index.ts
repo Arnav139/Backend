@@ -20,8 +20,8 @@ interface AuthenticatedRequest extends Request {
     }
     req.user=user
     next()
-    }catch(err){
-        res.status(400).send({message:err})
+    }catch(err:any){
+        res.status(400).send({message:err.message})
     }
 }
 

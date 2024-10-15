@@ -31,24 +31,60 @@ export default class user{
         const token = setUser({userId:data[0].id})
         console.log(token)
         return token
-    }catch(error:any){
-        throw new Error(error)
+        }catch(error:any){
+            throw new Error(error)
 
+        }
+    };
+
+    static loginUser = async (email: string, password: string) => {
+        try {
+        const user = await postgresdb.select().from(users).where(eq(users.email, email)).limit(1);
+        if (user.length === 0) {
+            throw new Error("User not found");
+        }
+        const token = setUser({userId:user[0].id})
+        return {token}
+
+        } catch (error: any) {
+            throw new Error(error);
+        }
+    
+};
+    
+    static updateUser = async ():Promise<any> =>{
+        try{
+  
+        }catch(error){
+            
+
+        }
     }
-}
 
-static loginUser = async (email: string, password: string) => {
-    try {
-      const user = await postgresdb.select().from(users).where(eq(users.email, email)).limit(1);
-      if (user.length === 0) {
-        throw new Error("User not found");
-      }
-      const token = setUser({userId:user[0].id})
-      return {token}
-    } catch (error: any) {
-      throw new Error(error);
+ 
+    static googleLogIn = async(userDetails:any)=>{
+        try{
+            const user = await postgresdb.select().from(users).where(eq(users.email, userDetails.email)).limit(1);
+            if (user.length === 0) {
+                const data:any = await postgresdb.insert(users).values({
+                    firstName:userDetails.given_name.trim(),
+                    lastName:userDetails.family_name,
+                    email:userDetails.email,
+                    phoneNumber:'null',
+                    password:"123"
+                }).returning({email:users.email,firstName:users.firstName,lastName:users.lastName,id:users.id})
+                const token = setUser({userId:data[0].id})
+                console.log("Registered User Token:",token)
+                return token
+            }
+            const token = setUser({userId:user[0].id})
+            console.log("Registered User Token:",token)
+            return token
+        }catch(error:any){
+            throw new Error(error.message)
+        }
     }
-  };
 
-   
+
+
 }

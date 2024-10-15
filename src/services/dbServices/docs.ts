@@ -1,40 +1,42 @@
 import postgresdb from "../../config/db";
 import DocumentModel from "../../models/document.model"; 
 import mongoose from "mongoose";
-import { documents } from "../../models/schema";
+import { documents, users } from "../../models/schema";
 import {and, desc, eq, inArray, sql,ne,asc} from "drizzle-orm";
 
 
 
 export default class document{
 
-    static createDocument = async (userId:string,content:any,metadata:any,keyword:any) => {
+    static createDocument = async (userId:number,content:any,metadata:any,keyword:any) => {
         try {
+            const userDetails = await postgresdb.select().from(users).where(eq(users.id,userId))
+            // console.log(userDetails)
+            if (userDetails[0].credits == 0) throw new Error("Not Sufficient Credits to Create Document")
             const newDocument = await postgresdb.insert(documents).values({
                 userId,      
                 content,     
                 metadata,    
                 keyword      
             }).returning({content:documents.content});
-            console.log(newDocument)
+            await postgresdb.update(users).set({credits:sql`${userDetails[0].credits} - 1`}).where(eq(users.id,userId)).execute()
             return newDocument; 
         } catch (error: any) {
             throw new Error(error.message || "Failed to create document");
         }
     };
-    // Fetch documents by user ID
     static getDocumentsByUserId = async (userId: number): Promise<any> => {
         try {
             const getDocument = await postgresdb
-                .select() // Start a select query
-                .from(documents) // Define the table you're querying
+                .select() 
+                .from(documents) 
                 .where(
                     and(
-                        eq(documents.userId, userId), // Match by userId
-                        eq(documents.isDeleted, false) // Only get non-deleted documents
+                        eq(documents.userId, userId), 
+                        eq(documents.isDeleted, false) 
                     )
                 )
-                .execute(); // Execute the query
+                .execute();
     
             return getDocument;
         } catch (erro:any) {
@@ -53,10 +55,11 @@ export default class document{
             .where(
                 and(
                     eq(documents.id, documentId), 
-                    eq(documents.userId, userId)
+                    eq(documents.userId, userId),
+                    eq(documents.isDeleted,false)  
                 )
             )
-            .returning({ id: documents.id })
+            .returning({ id: documents.id })    
             .execute();
             return result.length > 0
         } catch (error:any) {
@@ -64,7 +67,6 @@ export default class document{
             throw new Error(error);
         }
     };
-
 
     static updateIsFavoriteByDocumentId = async (userId: number, documentId: number): Promise<boolean> => {
         try {
@@ -100,4 +102,42 @@ export default class document{
             throw new Error(error);
         }
     };
+
+    static getDocumentsById = async (userId:number,documentId:number):Promise<any> => {
+        try{
+            const getDocument = await postgresdb.select().from(documents)
+            .where(
+                and(
+                    eq(documents.userId,userId),
+                    eq(documents.id,documentId),
+                    eq(documents.isDeleted,false)
+                )
+            ).execute();
+        return getDocument   
+        }catch(error:any){
+            throw new Error(error)
+        }
+
+    }
+
+    static updateDoc = async(userId:number,documentId:number,content:string)=>{
+        try{
+           const updateDocumnet = await postgresdb.update(documents).set({
+            content:content
+           })
+           .where(and(
+            eq(documents.userId,userId),
+            eq(documents.id,documentId),
+            eq(documents.isDeleted,false)
+        )).returning({
+            content:documents.content,
+            id:documents.id,
+            userId:documents.userId
+        }).execute()
+        console.log(updateDocumnet)
+        return updateDocumnet;
+        }catch(error:any){
+            throw new Error(error)
+        }
+    }
 }

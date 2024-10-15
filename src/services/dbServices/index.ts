@@ -1,7 +1,10 @@
 import user from "./user";
 import document from "./docs";
+import payments from "./payment";
+
 
 export default{
    user,
-   document 
+   document ,
+   payments
 }

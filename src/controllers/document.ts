@@ -4,6 +4,7 @@ import { aiWriter } from "../helper/ai";
 import {exec, execFile} from "child_process"
 import { stdout } from "process";
 import { Types } from "mongoose";
+import { messageToGroqRole } from "@langchain/groq";
 
 interface AuthenticatedRequest extends Request {
     user?: any;
@@ -75,7 +76,9 @@ export default class document{
     // Fetch documents by user ID
     static getDocumentsByUserIdController = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const userId = req.user.userId;
+            console.log("===========")
+            // const userId = req.user.userId;
+            const userId = 10;
             const documents = await dbServices.document.getDocumentsByUserId(userId);
             res.status(200).json({status:true,documents});
         } catch (error) {
@@ -105,6 +108,7 @@ export default class document{
     static toggleIsFavoriteByDocumentId = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const userId = req.user.userId;
+            console.log(userId)
             const documentId = req.params.documentId;
             const result = await dbServices.document.updateIsFavoriteByDocumentId(userId, parseInt(documentId));
             if (result) {
@@ -120,4 +124,33 @@ export default class document{
             res.status(500).json({status:false, error: "Internal Server Error" });
         }
     };
+
+
+    static getDocumentById = async (req: AuthenticatedRequest,res:Response)=>{
+        try{
+            const userId = req.user.userId;
+            const documentId = req.params.documentId;
+            if(!userId || !documentId) res.status(500).send({statys:false,messsage:"Error in getting UserId or documentId"})
+            const result = await dbServices.document.getDocumentsById(userId,parseInt(documentId))
+            if(result.length == 0) res.status(500).send({statys:false,messsage:"Data Not Found..."})
+            res.status(200).send({status:true,message:"Get Documnet Successfully",result})
+        }catch(error:any){
+            res.status(500).json({status:false, error: "Error in getting Document"});
+        }
+    }
+
+
+    static updateDocument = async(req:AuthenticatedRequest,res:Response)=>{
+        try{
+            const userId = req.user.userId;
+            const documentId = req.params.documentId
+            const content = req.body.content
+            if(!content) res.status(500).send({message:"content Not Found",status:false})
+            const updateDoc = await dbServices.document.updateDoc(userId,parseInt(documentId),content)
+            if(!updateDoc)  res.status(500).send({message:"unable To get DocId",status:false})
+            res.status(200).send({message:"Document Updated Successfully",status:true,updateDoc})
+        }catch(error:any){
+            res.status(500).send({message:error.message,status:false})
+        }
+    }
 }
