@@ -5,7 +5,7 @@ import router from "./routes";
 import connectDB from "./config/db";
 
 const app = express();
-const port = process.env.port
+const port = process.env.port || 8000
 
 app.use(
     cors({
@@ -19,7 +19,9 @@ app.use('/', router);
 
 
 
-app.listen(port, async () => {
+const server = app.listen(port, async () => {
     logger.info(`Server is running on port ${port}`);
     // await connectDB();
 });
+
+export {app,server};
