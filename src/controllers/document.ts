@@ -117,26 +117,12 @@ export default class document {
     res: Response
   ) => {
     try {
-      // console.log("===========")
+      console.log("===========");
       const userId = req.user.userId;
       // const userId = 10;
       const documents = await dbServices.document.getDocumentsByUserId(userId);
-      const docWithWords = documents.map((document: any) => {
-        return {
-          ...document,
-          words: document.content
-            .split(/\s+/)
-            .filter((word: string | any[]) => word.length > 0).length,
-        };
-      });
-      res
-        .status(200)
-        .send({
-          status: true,
-          message: "All documents fetched",
-          data: docWithWords,
-        });
-      // res.status(200).json({status:true,document});
+
+      res.status(200).json({ status: true, documents });
     } catch (error) {
       console.error("Error fetching documents:", error);
       res.status(500).json({ status: false, error: "Internal Server Error" });
