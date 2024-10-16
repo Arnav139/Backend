@@ -96,9 +96,10 @@ export default class document {
   ) => {
     try {
       console.log("===========");
-      // const userId = req.user.userId;
-      const userId = 10;
+      const userId = req.user.userId;
+      // const userId = 10;
       const documents = await dbServices.document.getDocumentsByUserId(userId);
+
       res.status(200).json({ status: true, documents });
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -169,10 +170,12 @@ export default class document {
       const userId = req.user.userId;
       const documentId = req.params.documentId;
       if (!userId || !documentId)
-        res.status(500).send({
-          statys: false,
-          messsage: "Error in getting UserId or documentId",
-        });
+        res
+          .status(500)
+          .send({
+            statys: false,
+            messsage: "Error in getting UserId or documentId",
+          });
       const result = await dbServices.document.getDocumentsById(
         userId,
         parseInt(documentId)
@@ -203,11 +206,13 @@ export default class document {
       );
       if (!updateDoc)
         res.status(500).send({ message: "unable To get DocId", status: false });
-      res.status(200).send({
-        message: "Document Updated Successfully",
-        status: true,
-        updateDoc,
-      });
+      res
+        .status(200)
+        .send({
+          message: "Document Updated Successfully",
+          status: true,
+          updateDoc,
+        });
     } catch (error: any) {
       res.status(500).send({ message: error.message, status: false });
     }
