@@ -5,6 +5,7 @@ import {exec, execFile} from "child_process"
 import { stdout } from "process";
 import { Types } from "mongoose";
 import { messageToGroqRole } from "@langchain/groq";
+import { any } from "zod";
 
 interface AuthenticatedRequest extends Request {
     user?: any;
@@ -54,7 +55,7 @@ export default class document{
             // let userId = "66fb951822f626ed85d3db2c";
             let UserId= req.user.userId;
             // console.log(UserId)
-            const { metadata} = req.body;  // Assuming these fields come from the request body
+            const { metadata } = req.body;  // Assuming these fields come from the request body
             const ai=await aiWriter(metadata.title,metadata.personality,metadata.tone) 
             let cleanedArticle;
             let cleanedExcerpt;
@@ -65,8 +66,11 @@ export default class document{
                 ai.excerpt = cleanedExcerpt;
             }
             const keyword = await this.extractExcerptAndKeywords(cleanedExcerpt);
-            await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword);
-            res.status(201).send({status:true,message:"Document Created Successfully",data:cleanedArticle});
+            const documentData:any = await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword);
+            const wordCount = cleanedArticle?.split(/\s+/).filter(word => word.length > 0).length;
+            documentData.newDocument[0].wordCount = wordCount
+            // console.log("DocumentData:::",documentData.newDocument[0])
+            res.status(201).send({status:true,message:"Document Created Successfully",data:documentData.newDocument[0],credit:documentData.credits[0].credits});
         } catch (error:any) {
             console.error("Error creating document:", error);
             res.status(500).send({ status: false ,error: error.message });

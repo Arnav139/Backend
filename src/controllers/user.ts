@@ -21,10 +21,10 @@ export default class user{
                 throw new Error(" error in user Registration")
             }
             res.status(200).json({status:true,message: "User registered successfully",data: newUser});
-        } catch (error: any) {
+        }catch (error: any) {
                 res.status(500).json({ status:false ,  message: error.message });
-            }
         }
+    }
 
 // Controller for handling user login
     static loginUser = async (req: Request, res: Response) => {
@@ -60,7 +60,7 @@ export default class user{
             // console.log(token)
             // let clientId = "29161426415-je4u4oenhp1bj0rbkq9ojspulh0g3op4.apps.googleusercontent.com";
             // let clientSecret = "'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";
-            let REDIRECT_URI = "http://localhost:8000/";
+            // let REDIRECT_URI = "http://localhost:8000/";
             const validateUser = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${token}`);
 
             if (validateUser.data.verified_email == false) res.status(500).send({status:false,message:"Your email is not authorized by Google"})

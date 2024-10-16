@@ -126,7 +126,6 @@ export class Payment {
       if(response.data.order_status === 'PAID'){
        const data =  dbServices.payments.confirmOrderStatus(orderId,"success")
         // const url = `` 
-        console.log(data ,"11111111111111111111111  ")
         res.status(200).send({status:true,message:"Status Success",data:data})
         // res.redirect(url)
         // res.status(200).send(response.data)
