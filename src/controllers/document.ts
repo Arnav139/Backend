@@ -78,13 +78,11 @@ export default class document {
         metadata,
         keyword
       );
-      res
-        .status(201)
-        .send({
-          status: true,
-          message: "Document Created Successfully",
-          data: cleanedArticle,
-        });
+      res.status(201).send({
+        status: true,
+        message: "Document Created Successfully",
+        data: cleanedArticle,
+      });
     } catch (error: any) {
       console.error("Error creating document:", error);
       res.status(500).send({ status: false, error: error.message });
