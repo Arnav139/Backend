@@ -1,9 +1,14 @@
 import { messageToGroqRole } from "@langchain/groq";
 import { exec, execFile } from "child_process";
+import { messageToGroqRole } from "@langchain/groq";
+import { exec, execFile } from "child_process";
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import { Types } from "mongoose";
 import { stdout } from "process";
 import { any } from "zod";
+import { aiWriter } from "../helper/ai";
+import dbServices from "../services/dbServices";
 import { aiWriter } from "../helper/ai";
 import dbServices from "../services/dbServices";
 
@@ -11,8 +16,25 @@ interface AuthenticatedRequest extends Request {
   user?: any;
   body: any;
   params: any;
+  user?: any;
+  body: any;
+  params: any;
 }
 
+export default class document {
+  // Create a new document
+  // static createDocumentController = async (req: AuthenticatedRequest, res: Response) => {
+  //     try {
+  //         const userId = req.user;
+  //         const { metadata } = req.body;
+  //         const content = "Dummy Data";
+  //         const newDocument = await dbServices.document.createDocument(userId, content, metadata);
+  //         res.status(201).json(newDocument);
+  //     } catch (error) {
+  //         console.error("Error creating document:", error);
+  //         res.status(500).json({ error: "Internal Server Error" });
+  //     }
+  // };
 export default class document {
   // Create a new document
   // static createDocumentController = async (req: AuthenticatedRequest, res: Response) => {
@@ -56,7 +78,7 @@ export default class document {
     try {
       // let userId = "66fb951822f626ed85d3db2c";
       let UserId = req.user.userId;
-      console.log(UserId);
+      // console.log(UserId)
       const { metadata } = req.body; // Assuming these fields come from the request body
       const ai = await aiWriter(
         metadata.title,
@@ -120,7 +142,65 @@ export default class document {
       res.status(500).json({ status: false, error: "Internal Server Error" });
     }
   };
+  // Fetch documents by user ID
+  static getDocumentsByUserIdController = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    try {
+      // console.log("===========")
+      const userId = req.user.userId;
+      // const userId = 10;
+      const documents = await dbServices.document.getDocumentsByUserId(userId);
+      const docWithWords = documents.map((document: any) => {
+        return {
+          ...document,
+          words: document.content
+            .split(/\s+/)
+            .filter((word: string | any[]) => word.length > 0).length,
+        };
+      });
+      res
+        .status(200)
+        .send({
+          status: true,
+          message: "All documents fetched",
+          data: docWithWords,
+        });
+      // res.status(200).json({status:true,document});
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      res.status(500).json({ status: false, error: "Internal Server Error" });
+    }
+  };
 
+  // Delete a document by user ID
+  static deleteDocumentByUserId = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    try {
+      const userId = req.user.userId;
+      const documentId = req.params.documentId;
+      const result = await dbServices.document.deleteDocumentById(
+        userId,
+        parseInt(documentId)
+      );
+      if (result) {
+        res
+          .status(200)
+          .json({ status: true, message: "Document deleted successfully" });
+      } else {
+        res.status(404).json({
+          status: false,
+          message: "Document not found or not authorized to delete",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error deleting document:", error);
+      res.status(500).json({ status: false, error: error.message });
+    }
+  };
   // Delete a document by user ID
   static deleteDocumentByUserId = async (
     req: AuthenticatedRequest,
@@ -178,18 +258,45 @@ export default class document {
       res.status(500).json({ status: false, error: "Internal Server Error" });
     }
   };
+  // toggle  isFavorite of document by document ID
+  static toggleIsFavoriteByDocumentId = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    try {
+      const userId = req.user.userId;
+      console.log(userId);
+      const documentId = req.params.documentId;
+      const result = await dbServices.document.updateIsFavoriteByDocumentId(
+        userId,
+        parseInt(documentId)
+      );
+      if (result) {
+        res.status(200).json({
+          status: true,
+          message: "Document isFavorite updated successfully",
+        });
+      } else {
+        res.status(400).json({
+          status: false,
+          message: "Document not found or not authorized to update isFavorite",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      res.status(500).json({ status: false, error: "Internal Server Error" });
+    }
+  };
 
   static getDocumentById = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const userId = req.user.userId;
       const documentId = req.params.documentId;
       if (!userId || !documentId)
-        res
-          .status(500)
-          .send({
-            statys: false,
-            messsage: "Error in getting UserId or documentId",
-          });
+        res.status(500).send({
+          statys: false,
+          messsage: "Error in getting UserId or documentId",
+        });
       const result = await dbServices.document.getDocumentsById(
         userId,
         parseInt(documentId)
@@ -220,13 +327,11 @@ export default class document {
       );
       if (!updateDoc)
         res.status(500).send({ message: "unable To get DocId", status: false });
-      res
-        .status(200)
-        .send({
-          message: "Document Updated Successfully",
-          status: true,
-          data: updateDoc,
-        });
+      res.status(200).send({
+        message: "Document Updated Successfully",
+        status: true,
+        updateDoc,
+      });
     } catch (error: any) {
       res.status(500).send({ message: error.message, status: false });
     }

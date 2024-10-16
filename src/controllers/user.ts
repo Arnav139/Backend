@@ -6,6 +6,9 @@ import dbServices from "../services/dbServices";
 interface authenticateReq {
   user?: any;
   body?: any;
+interface authenticateReq {
+  user?: any;
+  body?: any;
 }
 export default class user {
   static registerUser = async (req: Request, res: Response) => {
@@ -28,6 +31,33 @@ export default class user {
         message: "User registered successfully",
         data: newUser,
       });
+    } catch (error: any) {
+      res.status(500).json({ status: false, message: error.message });
+    }
+  };
+export default class user {
+  static registerUser = async (req: Request, res: Response) => {
+    const { firstName, lastName, email, phoneNumber, password } = req.body;
+    try {
+      // console.log(req.body)
+      const newUser = await dbServices.user.registerUser({
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        password,
+      });
+      // console.log("NewUser::",newUser)
+      if (!newUser) {
+        throw new Error(" error in user Registration");
+      }
+      res
+        .status(200)
+        .json({
+          status: true,
+          message: "User registered successfully",
+          data: newUser,
+        });
     } catch (error: any) {
       res.status(500).json({ status: false, message: error.message });
     }
@@ -96,6 +126,30 @@ export default class user {
           status: false,
           message: "Your email is not authorized by Google",
         });
+
+      const genToken = await dbServices.user.googleLogIn(validateUser.data);
+
+      // console.log(genToken.token);
+      // console.log(genToken.user);
+  static googleLogIn = async (req: Request, res: Response) => {
+    try {
+      console.log("In the google LogIn");
+      const token = req.query.token;
+      // console.log(token)
+      // let clientId = "29161426415-je4u4oenhp1bj0rbkq9ojspulh0g3op4.apps.googleusercontent.com";
+      // let clientSecret = "'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";
+      // let REDIRECT_URI = "http://localhost:8000/";
+      const validateUser = await axios.get(
+        `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${token}`
+      );
+
+      if (validateUser.data.verified_email == false)
+        res
+          .status(500)
+          .send({
+            status: false,
+            message: "Your email is not authorized by Google",
+          });
 
       const genToken = await dbServices.user.googleLogIn(validateUser.data);
 
