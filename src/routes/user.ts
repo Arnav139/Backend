@@ -11,6 +11,7 @@ const router = Router();
 router.post("/register", validateRequest(validators.auth.registerUserSchema),controller.user.registerUser); 
 router.post("/login", validateRequest(validators.auth.loginUserSchema),controller.user.loginUser);
 router.get("/google-login",controller.user.googleLogIn)
+router.get("/",authenticateUser , controller.user.userdetails )
 // router.post("/logout",validateRequest(validators.auth.logoutUserSchema),controller.user.logoutUser)
 router.post("/checkout",authenticateUser,controller.Payment.payment) // not 
 router.post('/cashfree',authenticateUser, controller.Payment.createOrderCashfree); // first 

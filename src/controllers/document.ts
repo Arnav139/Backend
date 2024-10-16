@@ -81,9 +81,11 @@ export default class document{
     static getDocumentsByUserIdController = async (req: AuthenticatedRequest, res: Response) => {
         try {
             console.log("===========")
-            // const userId = req.user.userId;
-            const userId = 10;
+            const userId = req.user.userId;
+            // const userId = 10;
             const documents = await dbServices.document.getDocumentsByUserId(userId);
+
+            
             res.status(200).json({status:true,documents});
         } catch (error) {
             console.error("Error fetching documents:", error);

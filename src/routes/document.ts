@@ -10,7 +10,7 @@ router.get("/abc",async(req,res):Promise<any>=>{
   return res.status(200).send({ status:true, message: "Api is running" });
 });
 
-router.post("/create",authenticateUser,validateRequest(validators.auth.createDocument) ,controller.document.createDocumentController);
+router.post("/",authenticateUser,validateRequest(validators.auth.createDocument) ,controller.document.createDocumentController);
 router.get("/", authenticateUser,validateRequest(validators.auth.getDocumentsById) ,controller.document.getDocumentsByUserIdController);
 router.put("/:documentId",authenticateUser, controller.document.toggleIsFavoriteByDocumentId);
 router.delete("/:documentId", authenticateUser, controller.document.deleteDocumentByUserId);
