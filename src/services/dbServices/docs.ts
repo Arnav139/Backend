@@ -16,9 +16,11 @@ export default class document{
                 content,     
                 metadata,     
                 keyword      
-            }).returning({id:documents.id,content:documents.content,updatedAt:documents.updatedAt,isFavorite:documents.isFavorite});
-            const credits = await postgresdb.update(users).set({credits:sql`${userDetails[0].credits} - 1`}).where(eq(users.id,userId)).returning({credits:users.credits}).execute()
-            return {newDocument,credits}; 
+            }).returning({content:documents.content});
+
+            await postgresdb.update(users).set({credits:sql`${userDetails[0].credits} - 1`}).where(eq(users.id,userId)).execute()
+            //  console.log(newDocument);
+            return newDocument; 
         } catch (error: any) {
             throw new Error(error.message || "Failed to create document");
         }

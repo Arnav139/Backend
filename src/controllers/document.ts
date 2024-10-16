@@ -56,7 +56,7 @@ export default class document {
     try {
       // let userId = "66fb951822f626ed85d3db2c";
       let UserId = req.user.userId;
-      // console.log(UserId)
+      console.log(UserId);
       const { metadata } = req.body; // Assuming these fields come from the request body
       const ai = await aiWriter(
         metadata.title,
@@ -78,11 +78,13 @@ export default class document {
         metadata,
         keyword
       );
-      res.status(201).send({
-        status: true,
-        message: "Document Created Successfully",
-        data: cleanedArticle,
-      });
+      res
+        .status(201)
+        .send({
+          status: true,
+          message: "Document Created Successfully",
+          data: cleanedArticle,
+        });
     } catch (error: any) {
       console.error("Error creating document:", error);
       res.status(500).send({ status: false, error: error.message });
@@ -170,12 +172,10 @@ export default class document {
       const userId = req.user.userId;
       const documentId = req.params.documentId;
       if (!userId || !documentId)
-        res
-          .status(500)
-          .send({
-            statys: false,
-            messsage: "Error in getting UserId or documentId",
-          });
+        res.status(500).send({
+          statys: false,
+          messsage: "Error in getting UserId or documentId",
+        });
       const result = await dbServices.document.getDocumentsById(
         userId,
         parseInt(documentId)
@@ -206,13 +206,11 @@ export default class document {
       );
       if (!updateDoc)
         res.status(500).send({ message: "unable To get DocId", status: false });
-      res
-        .status(200)
-        .send({
-          message: "Document Updated Successfully",
-          status: true,
-          updateDoc,
-        });
+      res.status(200).send({
+        message: "Document Updated Successfully",
+        status: true,
+        updateDoc,
+      });
     } catch (error: any) {
       res.status(500).send({ message: error.message, status: false });
     }
