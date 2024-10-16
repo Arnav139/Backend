@@ -94,9 +94,9 @@ export default class user {
         firstName,
         lastName,
         email,
-        credits,
-        image: validateUser.data.picture,
-        name: validateUser.data.name,
+        credits
+        // image: validateUser.data.picture,
+        // name: validateUser.data.name,
       };
       res
         .status(200)
@@ -114,20 +114,21 @@ export default class user {
   static userdetails = async (req: authenticateReq, res: Response) => {
     try {
       const user = req.user.userId;
+    //   console.log(req.user);
       if (!user) {
         res.status(404).json({ status: false, message: "user not found" });
       }
 
-      console.log(user);
+    //   console.log(user);
       const data = await dbServices.user.userDetails(user);
       if (!data) {
         res.status(404).json({ status: false, message: "user not found" });
       }
       res
         .status(200)
-        .send({ status: true, message: "user details", data: data });
+        .send({ status: true, message: "user details", data: data[0] });
     } catch (e: any) {
-      res.send(500).json({ status: false, message: e.mesage });
+      res.status(500).json({ status: false, message: e.mesage });
     }
   };
 
