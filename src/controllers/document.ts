@@ -53,7 +53,7 @@ export default class document{
         try {
             // let userId = "66fb951822f626ed85d3db2c";
             let UserId= req.user.userId;
-            // console.log(UserId)
+            console.log(UserId)
             const { metadata} = req.body;  // Assuming these fields come from the request body
             const ai=await aiWriter(metadata.title,metadata.personality,metadata.tone) 
             let cleanedArticle;
@@ -65,7 +65,7 @@ export default class document{
                 ai.excerpt = cleanedExcerpt;
             }
             const keyword = await this.extractExcerptAndKeywords(cleanedExcerpt);
-            await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword);
+            await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword); 
             res.status(201).send({status:true,message:"Document Created Successfully",data:cleanedArticle});
         } catch (error:any) {
             console.error("Error creating document:", error);
