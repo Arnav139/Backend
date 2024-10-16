@@ -28,7 +28,12 @@ export default class document{
     static getDocumentsByUserId = async (userId: number): Promise<any> => {
         try {
             const getDocument = await postgresdb
-                .select() 
+                .select({
+                    id:documents.id,
+                    content:documents.content,
+                    updatedAt:documents.updatedAt,
+                    isFavorite:documents.isFavorite,
+                }) 
                 .from(documents) 
                 .where(
                     and(
@@ -127,9 +132,9 @@ export default class document{
             eq(documents.id,documentId),
             eq(documents.isDeleted,false)
         )).returning({
-            content:documents.content,
             id:documents.id,
-            userId:documents.userId
+            content:documents.content,
+            userId:documents.userId,
         }).execute()
         console.log(updateDocumnet)
         return updateDocumnet;

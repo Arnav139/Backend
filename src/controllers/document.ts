@@ -95,12 +95,26 @@ export default class document {
     res: Response
   ) => {
     try {
-      console.log("===========");
+      // console.log("===========")
       const userId = req.user.userId;
       // const userId = 10;
       const documents = await dbServices.document.getDocumentsByUserId(userId);
-
-      res.status(200).json({ status: true, documents });
+      const docWithWords = documents.map((document: any) => {
+        return {
+          ...document,
+          words: document.content
+            .split(/\s+/)
+            .filter((word: string | any[]) => word.length > 0).length,
+        };
+      });
+      res
+        .status(200)
+        .send({
+          status: true,
+          message: "All documents fetched",
+          data: docWithWords,
+        });
+      // res.status(200).json({status:true,document});
     } catch (error) {
       console.error("Error fetching documents:", error);
       res.status(500).json({ status: false, error: "Internal Server Error" });
@@ -170,10 +184,12 @@ export default class document {
       const userId = req.user.userId;
       const documentId = req.params.documentId;
       if (!userId || !documentId)
-        res.status(500).send({
-          statys: false,
-          messsage: "Error in getting UserId or documentId",
-        });
+        res
+          .status(500)
+          .send({
+            statys: false,
+            messsage: "Error in getting UserId or documentId",
+          });
       const result = await dbServices.document.getDocumentsById(
         userId,
         parseInt(documentId)
@@ -204,11 +220,13 @@ export default class document {
       );
       if (!updateDoc)
         res.status(500).send({ message: "unable To get DocId", status: false });
-      res.status(200).send({
-        message: "Document Updated Successfully",
-        status: true,
-        updateDoc,
-      });
+      res
+        .status(200)
+        .send({
+          message: "Document Updated Successfully",
+          status: true,
+          data: updateDoc,
+        });
     } catch (error: any) {
       res.status(500).send({ message: error.message, status: false });
     }
