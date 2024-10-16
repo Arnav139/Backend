@@ -12,9 +12,9 @@ router.get("/abc",async(req,res):Promise<any>=>{
 
 router.post("/",authenticateUser,validateRequest(validators.auth.createDocument) ,controller.document.createDocumentController);
 router.get("/", authenticateUser,validateRequest(validators.auth.getDocumentsById) ,controller.document.getDocumentsByUserIdController);
-router.put("/:documentId",authenticateUser, controller.document.toggleIsFavoriteByDocumentId);
-router.delete("/:documentId", authenticateUser, controller.document.deleteDocumentByUserId);
-router.get("/:documentId",authenticateUser,controller.document.getDocumentById)
-router.patch("/:documentId",authenticateUser,controller.document.updateDocument)
+router.put("/:documentId",authenticateUser,validateRequest(validators.auth.updateDocumentIsFavourite), controller.document.toggleIsFavoriteByDocumentId);
+router.delete("/:documentId", authenticateUser,validateRequest(validators.auth.deleteDocumentById),controller.document.deleteDocumentByUserId);
+router.get("/:documentId",authenticateUser,validateRequest(validators.auth.getDocumentsById),controller.document.getDocumentById)
+router.patch("/:documentId",authenticateUser,validateRequest(validators.auth.updateDocument),controller.document.updateDocument)
 
 export default router;
