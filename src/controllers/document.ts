@@ -80,13 +80,19 @@ export default class document{
     // Fetch documents by user ID
     static getDocumentsByUserIdController = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            console.log("===========")
+            // console.log("===========")
             const userId = req.user.userId;
             // const userId = 10;
             const documents = await dbServices.document.getDocumentsByUserId(userId);
+            const docWithWords = documents.map((document:any)=>{
+                return {
+                    ...document,
+                    words:document.content.split(/\s+/).filter((word: string | any[]) => word.length > 0).length
+                }
 
-            
-            res.status(200).json({status:true,documents});
+            })
+            res.status(200).send({status:true,message:"All documents fetched",data:docWithWords});
+            // res.status(200).json({status:true,document});
         } catch (error) {
             console.error("Error fetching documents:", error);
             res.status(500).json({status:false, error: "Internal Server Error" });
@@ -145,7 +151,6 @@ export default class document{
         }
     }
 
-
     static updateDocument = async(req:AuthenticatedRequest,res:Response)=>{
         try{
             const userId = req.user.userId;
@@ -154,7 +159,7 @@ export default class document{
             if(!content) res.status(500).send({message:"content Not Found",status:false})
             const updateDoc = await dbServices.document.updateDoc(userId,parseInt(documentId),content)
             if(!updateDoc)  res.status(500).send({message:"unable To get DocId",status:false})
-            res.status(200).send({message:"Document Updated Successfully",status:true,updateDoc})
+            res.status(200).send({message:"Document Updated Successfully",status:true,data:updateDoc})
         }catch(error:any){
             res.status(500).send({message:error.message,status:false})
         }

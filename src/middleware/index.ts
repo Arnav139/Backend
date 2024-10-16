@@ -12,11 +12,12 @@ interface AuthenticatedRequest extends Request {
     try{
       const getToken:any = req.headers.authorization;
     if(!getToken){
-        res.status(400).send({message:"Token not found"})
+        res.status(401).send({message:"Token not found"})
     }
     const user:any=getUser(getToken)
+    console.log("User::",user)
     if(!user){
-        res.status(400).send({message:"User not Found"})
+        res.status(403).send({message:"User not Found"})
     }
     req.user=user
     next()
