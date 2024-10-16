@@ -66,7 +66,24 @@ export default class user{
             if (validateUser.data.verified_email == false) res.status(500).send({status:false,message:"Your email is not authorized by Google"})
 
             const genToken = await dbServices.user.googleLogIn(validateUser.data)
-            res.status(200).send({status:true,message:"LogedIn with Google",genToken})
+         
+            // console.log(genToken.token);
+            // console.log(genToken.user);
+
+            const accessToken = genToken.token
+            const data = genToken.user;
+            const {id,firstName,lastName,email,credits} = data
+
+        const response = {
+            id,
+            firstName,
+            lastName,
+            email,
+            credits,
+            image:validateUser.data.picture,
+            name:validateUser.data.name
+        }
+            res.status(200).send({status:true,message:"LogedIn with Google",accessToken,data:response})
         }catch(error:any){
             throw new Error(error)
         }

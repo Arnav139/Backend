@@ -12,9 +12,9 @@ router.post("/register", validateRequest(validators.auth.registerUserSchema),con
 router.post("/login", validateRequest(validators.auth.loginUserSchema),controller.user.loginUser);
 router.get("/google-login",controller.user.googleLogIn)
 // router.post("/logout",validateRequest(validators.auth.logoutUserSchema),controller.user.logoutUser)
-router.post("/checkout",authenticateUser,controller.Payment.payment)
-router.post('/cashfree',authenticateUser, controller.Payment.createOrderCashfree);
-router.get('/status/:orderId', controller.Payment.checkStatus)
+router.post("/checkout",authenticateUser,controller.Payment.payment) // not 
+router.post('/cashfree',authenticateUser, controller.Payment.createOrderCashfree); // first 
+router.get('/status/:orderId', controller.Payment.checkStatus) // second 
 
 
 export default router;
