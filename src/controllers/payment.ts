@@ -126,15 +126,15 @@ export class Payment {
       if(response.data.order_status === 'PAID'){
        const data =  dbServices.payments.confirmOrderStatus(orderId,"success")
         // const url = `` 
-        res.status(200).send({status:true,message:"Status Success",data:data})
-        // res.redirect(url)
+        // res.status(200).send({status:true,message:"Status Success",data:data})
+        res.redirect("https://0e8f-2401-4900-8843-9c99-16de-7ca9-378f-99a3.ngrok-free.app/success")
         // res.status(200).send(response.data)
       }else{
         dbServices.payments.updateOrderStatus(orderId,"failed")
         console.log("Status:Failed")
-        res.status(500).send({status:true,message:"Status Failed"})
+        // res.status(500).send({status:true,message:"Status Failed"})
         // const url = `` 
-        // res.redirect(url)
+        res.redirect("https://0e8f-2401-4900-8843-9c99-16de-7ca9-378f-99a3.ngrok-free.app/failure")
       }
     
     }catch(error:any){
