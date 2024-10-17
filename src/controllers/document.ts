@@ -66,12 +66,14 @@ export default class document{
                 ai.article = cleanedArticle;
                 ai.excerpt = cleanedExcerpt;
             }
+            let finalContent
+            if (cleanedArticle){ 
+                finalContent = marked(cleanedArticle)
+            }
             const keyword = await this.extractExcerptAndKeywords(cleanedExcerpt);
-            const documentData:any = await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword);
+            const documentData:any = await dbServices.document.createDocument(UserId,finalContent,metadata,keyword);
             const wordCount = cleanedArticle?.split(/\s+/).filter(word => word.length > 0).length;
             documentData.newDocument[0].wordCount = wordCount
-            const htmlContent=await marked(documentData.newDocument[0].content)
-            documentData.newDocument[0].content=htmlContent
             res.status(201).send({status:true,message:"Document Created Successfully",data:documentData.newDocument[0],credits:parseInt(documentData.credits[0].credits)});
         } catch (error:any) {
             console.error("Error creating document:", error);
@@ -159,9 +161,10 @@ export default class document{
             const documentId = req.params.documentId
             const content = req.body.content
             if(!content) res.status(500).send({message:"content Not Found",status:false})
-            const updateDoc = await dbServices.document.updateDoc(userId,parseInt(documentId),content)
-            if(!updateDoc)  res.status(500).send({message:"unable To get DocId",status:false})
-            res.status(200).send({message:"Document Updated Successfully",status:true,data:updateDoc})
+            const updateDoc:any = await dbServices.document.updateDoc(userId,parseInt(documentId),content)
+            const wordCount = content?.split(/\s+/).filter((word:any) => word.length > 0).length;
+            updateDoc[0].wordCount = wordCount
+            res.status(200).send({message:"Document Updated Successfully",status:true,data:updateDoc[0]})
         }catch(error:any){
             res.status(500).send({message:error.message,status:false})
         }

@@ -65,7 +65,7 @@ export default class user{
     static googleLogIn = async(userDetails:any)=>{
         try{
             const user:any= await postgresdb.select().from(users).where(eq(users.email, userDetails.email)).limit(1);
-            console.log("the user is",user)
+            // console.log("the user is",user)
             if (user.length === 0) {
                 const data:any = await postgresdb.insert(users).values({
                     firstName:userDetails.given_name.trim(),
@@ -75,7 +75,7 @@ export default class user{
                     password:"123"
                 }).returning({email:users.email,firstName:users.firstName,lastName:users.lastName,id:users.id,credit:users.credits})
                 const token = setUser({userId:data[0].id})
-                console.log("Registered User Tokenn:",token)
+                // console.log("Registered User Tokenn:",token)
                 return {token,data}
             }
             const token = setUser({userId:user[0].id})

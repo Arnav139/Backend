@@ -15,6 +15,6 @@ router.get("/", authenticateUser,validateRequest(validators.auth.getDocumentsByI
 router.put("/:documentId",authenticateUser,validateRequest(validators.auth.updateDocumentIsFavourite), controller.document.toggleIsFavoriteByDocumentId);
 router.delete("/:documentId", authenticateUser,validateRequest(validators.auth.deleteDocumentById),controller.document.deleteDocumentByUserId);
 router.get("/:documentId",authenticateUser,validateRequest(validators.auth.getDocumentsById),controller.document.getDocumentById)
-router.patch("/:documentId",authenticateUser,validateRequest(validators.auth.updateDocument),controller.document.updateDocument)
+router.post("/:documentId",authenticateUser,validateRequest(validators.auth.updateDocument),controller.document.updateDocument)
 
 export default router;

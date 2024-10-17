@@ -19,7 +19,7 @@ export const documents:any = pgTable('documents', {
     id: serial('id').primaryKey(),
     userId: integer('user_id').references(() => users.id).notNull(),
     content: text('content').notNull(),
-    metadata: jsonb('metadata').notNull(), 
+    metadata: jsonb('metadata'), 
     keyword:jsonb('keyword'),
     isDeleted: boolean('is_deleted').default(false),
     isFavorite: boolean('is_favorite').default(false),
@@ -49,6 +49,7 @@ export const paymentRelation = relations(payment,({one})=>({
 
 export const usersRelations = relations(users, ({ many }) => ({
   documents: many(documents),
+  payment: many(payment)
 }));
 
 

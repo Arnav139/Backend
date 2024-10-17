@@ -12,14 +12,15 @@ dotenv.config()
 const db = process.env.DBPORT as string
 const dbport = parseInt(db)
 
-export let client = new Client({
-  host: process.env.HOST,
-  port: dbport,
-  user: process.env.DBUSER,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE
-});
+// export let client = new Client({
+//   host: process.env.HOST,
+//   port: dbport,
+//   user: process.env.DBUSER,
+//   password: process.env.PASSWORD,
+//   database: process.env.DATABASE
+// });
 
+export const client=new Client(process.env.PG_URL)
 
 client.connect().then(()=>{
   logger.info("Postgress Client is Connected Successfully")
