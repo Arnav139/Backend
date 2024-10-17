@@ -1,5 +1,4 @@
 import postgresdb from "../../config/db";
-import DocumentModel from "../../models/document.model"; 
 import mongoose from "mongoose";
 import { documents, users } from "../../models/schema";
 import {and, desc, eq, inArray, sql,ne,asc} from "drizzle-orm";
@@ -10,6 +9,7 @@ export default class document{
 
     static createDocument = async (userId:number,content:any,metadata:any,keyword:any) => {
         try {
+            console.log(content)
             const userDetails = await postgresdb.select().from(users).where(eq(users.id,userId))
             // console.log(userDetails)
             if (userDetails[0].credits == 0) throw new Error("Not Sufficient Credits to Create Document")
@@ -127,20 +127,33 @@ export default class document{
 
     static updateDoc = async(userId:number,documentId:number,content:string)=>{
         try{
-           const updateDocumnet = await postgresdb.update(documents).set({
-            content:content
-           })
-           .where(and(
-            eq(documents.userId,userId),
-            eq(documents.id,documentId),
-            eq(documents.isDeleted,false)
-        )).returning({
-            id:documents.id,
-            content:documents.content,
-            userId:documents.userId,
-        }).execute()
-        console.log(updateDocumnet)
-        return updateDocumnet;
+            if(documentId===0){
+                
+                return await postgresdb.insert(documents).values({
+                    content:content,
+                    userId:userId
+                }).returning({
+                    content:documents.content,
+                    id:documents.id,
+                    updatedAt:documents.updatedAt,
+                    isFavorite:documents.isFavorite
+                })
+            }else{
+                return await postgresdb.update(documents).set({
+                    content:content
+                   })
+                   .where(and(
+                    eq(documents.userId,userId),
+                    eq(documents.id,documentId),
+                    eq(documents.isDeleted,false)
+                )).returning({
+                    id:documents.id,
+                    content:documents.content,
+                    userId:documents.userId
+                }).execute()
+            }
+           
+        
         }catch(error:any){
             throw new Error(error)
         }

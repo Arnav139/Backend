@@ -94,9 +94,7 @@ export default class validators {
         content: z.string().nonempty("Content is required"), // Validates that 'content' is a non-empty string
     }),
     params: z.object({
-        documentId: z.string().refine((id) => !isNaN(Number(id)), {
-            message: "documentId must be a number",  // Ensures documentId is a valid number
-        }),
+        documentId: z.string()
     }),
     query: z.object({}).strict(),
 });

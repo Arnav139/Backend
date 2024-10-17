@@ -1,5 +1,4 @@
 import { Request, response, Response } from "express";
-import { users } from "../models/schema";
 import dbServices from "../services/dbServices";
 import axios from "axios";
 
@@ -62,9 +61,8 @@ export default class user {
 
   static googleLogIn = async (req: Request, res: Response) => {
     try {
-    //   console.log("In the google LogIn");
       const token = req.query.token;
-      // console.log(token)
+      console.log("hit")
       // let clientId = "29161426415-je4u4oenhp1bj0rbkq9ojspulh0g3op4.apps.googleusercontent.com";
       // let clientSecret = "'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";
       // let REDIRECT_URI = "http://localhost:8000/";
@@ -102,7 +100,7 @@ export default class user {
         .status(200)
         .send({
           status: true,
-          message: "LogedIn with Google",
+          message: "LoggedIn",
           accessToken,
           data: response,
         });
@@ -114,18 +112,15 @@ export default class user {
   static userdetails = async (req: authenticateReq, res: Response) => {
     try {
       const user = req.user.userId;
-    //   console.log(req.user);
       if (!user) {
-        res.status(404).json({ status: false, message: "user not found" });
+        res.status(404).json({ status: false, message: "User not found" });
       }
 
-    //   console.log(user);
       const data = await dbServices.user.userDetails(user);
       if (!data) {
-        res.status(404).json({ status: false, message: "user not found" });
+        res.status(404).json({ status: false, message: "User not found" });
       }
       data[0].credits = parseInt(data[0].credits)
-    //   console.log("Credits:::::::::",data[0].credits)
       res
         .status(200)
         .send({ status: true, message: "user details", data: data[0] });
