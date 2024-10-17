@@ -15,7 +15,7 @@ interface AuthenticatedRequest extends Request {
         res.status(401).send({message:"Token not found"})
     }
     const user:any=getUser(getToken)
-    console.log("User::",user)
+    // console.log("User::",user)
     if(!user){
         res.status(403).send({message:"User not Found"})
     }

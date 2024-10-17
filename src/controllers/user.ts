@@ -62,7 +62,7 @@ export default class user {
 
   static googleLogIn = async (req: Request, res: Response) => {
     try {
-      console.log("In the google LogIn");
+    //   console.log("In the google LogIn");
       const token = req.query.token;
       // console.log(token)
       // let clientId = "29161426415-je4u4oenhp1bj0rbkq9ojspulh0g3op4.apps.googleusercontent.com";
@@ -90,11 +90,11 @@ export default class user {
       const { id, firstName, lastName, email, credits } = data;
 
       const response = {
-        id,
-        firstName,
-        lastName,
-        email,
-        credits
+        id:id,
+        firstName:firstName,
+        lastName:lastName,
+        email:email,
+        credits:parseInt(credits)
         // image: validateUser.data.picture,
         // name: validateUser.data.name,
       };
@@ -124,6 +124,8 @@ export default class user {
       if (!data) {
         res.status(404).json({ status: false, message: "user not found" });
       }
+      data[0].credits = parseInt(data[0].credits)
+    //   console.log("Credits:::::::::",data[0].credits)
       res
         .status(200)
         .send({ status: true, message: "user details", data: data[0] });

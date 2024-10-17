@@ -6,6 +6,7 @@ import { stdout } from "process";
 import { Types } from "mongoose";
 import { messageToGroqRole } from "@langchain/groq";
 import { any } from "zod";
+import {marked} from "marked"
 
 interface AuthenticatedRequest extends Request {
     user?: any;
@@ -69,8 +70,9 @@ export default class document{
             const documentData:any = await dbServices.document.createDocument(UserId, cleanedArticle, metadata,keyword);
             const wordCount = cleanedArticle?.split(/\s+/).filter(word => word.length > 0).length;
             documentData.newDocument[0].wordCount = wordCount
-            // console.log("DocumentData:::",documentData.newDocument[0])
-            res.status(201).send({status:true,message:"Document Created Successfully",data:documentData.newDocument[0],credit:documentData.credits[0].credits});
+            const htmlContent=await marked(documentData.newDocument[0].content)
+            documentData.newDocument[0].content=htmlContent
+            res.status(201).send({status:true,message:"Document Created Successfully",data:documentData.newDocument[0],credits:parseInt(documentData.credits[0].credits)});
         } catch (error:any) {
             console.error("Error creating document:", error);
             res.status(500).send({ status: false ,error: error.message });

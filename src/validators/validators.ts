@@ -45,7 +45,7 @@ export default class validators {
           .object({
             title: z.string().min(1, "Title is required"),
             researchLevel: z
-              .string()
+              .number()
               .min(1, "Research level is required")
               .optional(),
             personality: z
@@ -65,11 +65,7 @@ export default class validators {
 
   static getDocumentsById = z.object({
     body: z.object({}).strict(),   // No body content expected
-    params: z.object({
-        documentId: z.string().refine((id) => !isNaN(Number(id)), {
-            message: "documentId must be a valid number",
-        }),
-    }).strict(),  // Ensures documentId is present and a valid number
+    params: z.object({}).strict(),  // Ensures documentId is present and a valid number
     query: z.object({}).strict(),  // No query parameters expected
 });
 

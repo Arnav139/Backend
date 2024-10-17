@@ -9,7 +9,7 @@ export const users:any = pgTable('userss', {
     email: varchar('email', { length: 255 }).notNull().unique(),
     phoneNumber: varchar('phone_number',{length:10}).notNull(),
     password: varchar('password', { length: 255 }).notNull(),
-    credits:varchar("credits").default("10"),
+    credits:varchar("credits").default("50"),
     refreshToken: text('refresh_token'),
     createdAt: timestamp('created_at').default(sql`NOW()`),
     updatedAt: timestamp('updated_at').default(sql`NOW()`),

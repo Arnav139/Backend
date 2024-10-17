@@ -77,9 +77,9 @@ export default class payments{
           customer_id: userId,
           customer_phone: customerPhone,
         },
-        order_meta: {
-          return_url: `https://www.cashfree.com/devstudio/preview/pg/web/checkout?order_id={order_id}`,
-        },
+        // order_meta: {
+        //   return_url: `https://www.cashfree.com/devstudio/preview/pg/web/checkout?order_id={order_id}`,
+        // },
       };
       // console.log("Request:",request)
       const response = await Cashfree.PGCreateOrder("2023-08-01", request);

@@ -12,7 +12,7 @@ const defaultRoutes = [
     route: userROutes,
   },
   {
-    path: '/document',
+    path: '/documents',
     route: docRoutes,
   },
 

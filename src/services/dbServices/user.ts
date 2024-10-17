@@ -96,12 +96,12 @@ export default class user{
             firstName:users.firstName,
             lastName:users.lastName,
             email:users.email,
-            credit:users.credits
+            credits:users.credits
             // image:users.image,
             // name:users.name
 
         }).from(users).where(eq(users.id, data)).limit(1);
-        console.log(details)
+        // console.log(details) 
         return details;
         }catch(e){
             throw new Error
